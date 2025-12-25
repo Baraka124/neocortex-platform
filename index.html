@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ThoughtStream | My Digital Mind</title>
+    <title>MarkStream | Your Thoughts, Beautifully Rendered</title>
     <style>
-        /* Everything in one style tag */
         :root {
             --bg: #ffffff;
             --surface: #f8fafc;
@@ -15,6 +14,7 @@
             --accent: #8b5cf6;
             --border: #e2e8f0;
             --radius: 12px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         }
 
         .dark-mode {
@@ -23,6 +23,7 @@
             --text: #f1f5f9;
             --text-light: #94a3b8;
             --border: #334155;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
         * {
@@ -101,7 +102,6 @@
 
         .btn-primary:hover {
             background: #2563eb;
-            color: white;
         }
 
         /* Navigation */
@@ -136,7 +136,7 @@
         }
 
         /* Content */
-        .thought {
+        .content-section {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: var(--radius);
@@ -145,49 +145,49 @@
             transition: all 0.3s ease;
         }
 
-        .thought:hover {
+        .content-section:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow);
         }
 
-        .thought-header {
+        .section-header {
             display: flex;
             justify-content: space-between;
             align-items: start;
             margin-bottom: 1rem;
         }
 
-        .thought-title {
+        .section-title {
             font-size: 1.5rem;
             color: var(--text);
             text-decoration: none;
         }
 
-        .thought-title:hover {
+        .section-title:hover {
             color: var(--primary);
         }
 
-        .thought-date {
+        .section-date {
             color: var(--text-light);
             font-size: 0.875rem;
             white-space: nowrap;
         }
 
-        .thought-content {
+        .section-content {
             color: var(--text);
             line-height: 1.8;
         }
 
-        .thought-content h2,
-        .thought-content h3 {
+        .section-content h2,
+        .section-content h3 {
             margin: 1.5rem 0 1rem;
         }
 
-        .thought-content p {
+        .section-content p {
             margin: 1rem 0;
         }
 
-        .thought-content code {
+        .section-content code {
             background: rgba(0, 0, 0, 0.1);
             padding: 0.2rem 0.4rem;
             border-radius: 4px;
@@ -195,7 +195,7 @@
             font-size: 0.9em;
         }
 
-        .thought-content pre {
+        .section-content pre {
             background: rgba(0, 0, 0, 0.1);
             padding: 1rem;
             border-radius: 8px;
@@ -203,7 +203,13 @@
             margin: 1rem 0;
         }
 
-        .thought-tags {
+        .section-content img {
+            max-width: 100%;
+            border-radius: var(--radius);
+            margin: 1rem 0;
+        }
+
+        .section-tags {
             display: flex;
             gap: 0.5rem;
             margin-top: 1rem;
@@ -216,6 +222,11 @@
             padding: 0.25rem 0.75rem;
             border-radius: 100px;
             font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .tag:hover {
+            background: rgba(59, 130, 246, 0.2);
         }
 
         /* FAB */
@@ -238,7 +249,6 @@
 
         .fab:hover {
             transform: scale(1.1);
-            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.6);
         }
 
         /* Footer */
@@ -251,17 +261,39 @@
             font-size: 0.875rem;
         }
 
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            color: var(--text-light);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(59, 130, 246, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         /* Responsive */
         @media (max-width: 640px) {
             .container {
                 padding: 1rem;
             }
             
-            .thought {
+            .content-section {
                 padding: 1.5rem;
             }
             
-            .thought-header {
+            .section-header {
                 flex-direction: column;
                 gap: 0.5rem;
             }
@@ -272,44 +304,48 @@
     <div class="header">
         <div class="container">
             <div class="header-content">
-                <a href="#" class="logo" onclick="scrollToTop()">💭 ThoughtStream</a>
+                <a href="#" class="logo" onclick="scrollToTop()">📖 MarkStream</a>
                 <div class="controls">
                     <button class="btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
                     <button class="btn" onclick="refreshContent()" id="refreshBtn">🔄</button>
-                    <button class="btn btn-primary" onclick="editOnGitHub()">✏️ Edit</button>
+                    <button class="btn btn-primary" onclick="editContent()">✏️ Edit</button>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="container">
-        <!-- Navigation will be auto-generated -->
+        <!-- Navigation -->
         <nav class="nav" id="navContainer"></nav>
 
-        <!-- All thoughts will be rendered here -->
-        <div id="thoughtsContainer"></div>
-
-        <!-- Stats -->
-        <div class="thought" id="statsCard">
-            <h3>📊 Your Mind at a Glance</h3>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
-                <div style="text-align: center;">
-                    <div style="font-size: 2rem; font-weight: bold; color: var(--primary);" id="thoughtCount">0</div>
-                    <small>Thoughts</small>
-                </div>
-                <div style="text-align: center;">
-                    <div style="font-size: 2rem; font-weight: bold; color: var(--accent);" id="wordCount">0</div>
-                    <small>Words</small>
-                </div>
-                <div style="text-align: center;">
-                    <div style="font-size: 2rem; font-weight: bold; color: #10b981;" id="lastUpdate">Now</div>
-                    <small>Last Update</small>
-                </div>
+        <!-- Content Sections -->
+        <div id="contentContainer">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading your content...</p>
             </div>
         </div>
 
+        <!-- Stats -->
+        <div class="content-section" id="statsSection">
+            <h3>📊 Content Overview</h3>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1rem;">
+                <div style="text-align: center;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--primary);" id="sectionCount">0</div>
+                    <small>Sections</small>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--accent);" id="wordCount">0</div>
+                    <small>Total Words</small>
+                </div>
+            </div>
+            <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-light);">
+                Last updated: <span id="lastUpdate">Loading...</span>
+            </p>
+        </div>
+
         <div class="footer">
-            <p>Powered by ThoughtStream • Just edit <code>thoughts.md</code> to update everything</p>
+            <p>Powered by MarkStream • Just edit <code>content.md</code> to update everything</p>
             <p style="margin-top: 0.5rem; font-size: 0.75rem;">
                 <span id="syncStatus" style="display: inline-flex; align-items: center; gap: 0.25rem;">
                     <span style="display: inline-block; width: 6px; height: 6px; background: #ef4444; border-radius: 50%;"></span>
@@ -327,90 +363,76 @@
             github: {
                 user: 'YOUR_USERNAME',     // ← Change this!
                 repo: 'YOUR_REPO_NAME',    // ← Change this!
-                file: 'thoughts.md'
+                file: 'content.md'          // Your markdown file
             },
             updateCheckInterval: 30000, // 30 seconds
             cacheDuration: 5 * 60 * 1000 // 5 minutes
         };
 
         // ========== CORE ==========
-        class ThoughtStream {
+        class MarkStream {
             constructor() {
-                this.thoughts = [];
+                this.sections = [];
                 this.currentFilter = 'all';
                 this.lastHash = '';
                 this.init();
             }
 
             async init() {
-                // Load saved theme
                 this.loadTheme();
-                
-                // Load thoughts
-                await this.loadThoughts();
-                
-                // Set up auto-refresh
+                await this.loadContent();
                 this.startAutoRefresh();
-                
-                // Handle hash navigation
                 window.addEventListener('hashchange', () => this.handleHash());
                 this.handleHash();
-                
-                console.log('ThoughtStream ready!');
+                console.log('MarkStream ready!');
             }
 
-            async loadThoughts() {
+            async loadContent() {
                 try {
                     const url = `https://api.github.com/repos/${CONFIG.github.user}/${CONFIG.github.repo}/contents/${CONFIG.github.file}`;
                     const response = await fetch(url);
                     const data = await response.json();
                     
                     const content = atob(data.content);
-                    this.parseThoughts(content);
+                    this.parseContent(content);
                     
-                    // Update sync status
                     this.updateSyncStatus(true, data.sha);
                     
                 } catch (error) {
                     console.error('Failed to load:', error);
-                    this.loadDemoThoughts();
+                    this.loadDemoContent();
                     this.updateSyncStatus(false);
                 }
             }
 
-            parseThoughts(content) {
-                // Split by thought separator (---)
-                const sections = content.split('\n---\n');
-                this.thoughts = [];
+            parseContent(content) {
+                // Split by section separator (--- with newlines)
+                const rawSections = content.split(/\n---\n/);
+                this.sections = [];
                 
-                sections.forEach((section, index) => {
+                rawSections.forEach((section, index) => {
                     if (section.trim()) {
-                        const thought = this.parseThought(section, index);
-                        if (thought) {
-                            this.thoughts.push(thought);
+                        const parsed = this.parseSection(section, index);
+                        if (parsed) {
+                            this.sections.push(parsed);
                         }
                     }
                 });
                 
-                // Sort by date (newest first)
-                this.thoughts.sort((a, b) => new Date(b.date) - new Date(a.date));
-                
-                // Update UI
                 this.render();
             }
 
-            parseThought(text, id) {
+            parseSection(text, id) {
                 const lines = text.trim().split('\n');
-                const thought = {
-                    id: `thought-${id}`,
-                    title: 'Untitled Thought',
+                const section = {
+                    id: `section-${id}`,
+                    title: 'Untitled',
                     content: '',
                     date: new Date().toISOString().split('T')[0],
                     tags: [],
                     raw: text
                 };
                 
-                // Parse frontmatter-like format
                 let inFrontmatter = false;
                 let contentLines = [];
                 
@@ -427,9 +449,9 @@
                             const cleanKey = key.trim().toLowerCase();
                             const cleanValue = value.trim();
                             
-                            if (cleanKey === 'title') thought.title = cleanValue;
-                            if (cleanKey === 'date') thought.date = cleanValue;
-                            if (cleanKey === 'tags') thought.tags = cleanValue.split(',').map(t => t.trim());
+                            if (cleanKey === 'title') section.title = cleanValue;
+                            if (cleanKey === 'date') section.date = cleanValue;
+                            if (cleanKey === 'tags') section.tags = cleanValue.split(',').map(t => t.trim());
                         }
                     } else {
                         contentLines.push(line);
@@ -440,49 +462,44 @@
                 if (!inFrontmatter && lines.length > 0) {
                     const firstLine = lines[0].trim();
                     if (firstLine.startsWith('# ')) {
-                        thought.title = firstLine.substring(2);
+                        section.title = firstLine.substring(2);
                         contentLines = lines.slice(1);
                     } else {
-                        thought.title = firstLine.substring(0, 50) + (firstLine.length > 50 ? '...' : '');
+                        section.title = firstLine.substring(0, 50) + (firstLine.length > 50 ? '...' : '');
                         contentLines = lines;
                     }
                 }
                 
-                thought.content = contentLines.join('\n');
-                return thought;
+                section.content = contentLines.join('\n');
+                return section;
             }
 
             render() {
-                // Update stats
                 this.updateStats();
-                
-                // Render navigation
                 this.renderNavigation();
-                
-                // Render thoughts
-                this.renderThoughts();
+                this.renderSections();
             }
 
             updateStats() {
-                const totalWords = this.thoughts.reduce((sum, thought) => {
-                    return sum + thought.content.split(/\s+/).length;
+                const totalWords = this.sections.reduce((sum, section) => {
+                    return sum + section.content.split(/\s+/).length;
                 }, 0);
                 
-                document.getElementById('thoughtCount').textContent = this.thoughts.length;
+                document.getElementById('sectionCount').textContent = this.sections.length;
                 document.getElementById('wordCount').textContent = totalWords.toLocaleString();
                 document.getElementById('lastUpdate').textContent = 'Just now';
             }
 
             renderNavigation() {
                 const container = document.getElementById('navContainer');
-                const tags = [...new Set(this.thoughts.flatMap(t => t.tags))].filter(t => t);
+                const tags = [...new Set(this.sections.flatMap(s => s.tags))].filter(t => t);
                 
                 const items = [
-                    { id: 'all', label: 'All Thoughts', count: this.thoughts.length },
+                    { id: 'all', label: 'All Content', count: this.sections.length },
                     ...tags.map(tag => ({
                         id: tag,
                         label: `#${tag}`,
-                        count: this.thoughts.filter(t => t.tags.includes(tag)).length
+                        count: this.sections.filter(s => s.tags.includes(tag)).length
                     }))
                 ];
                 
@@ -491,7 +508,7 @@
                         ${items.map(item => `
                             <a href="#${item.id}" 
                                class="nav-item ${this.currentFilter === item.id ? 'active' : ''}"
-                               onclick="thoughtStream.filterThoughts('${item.id}')">
+                               onclick="markStream.filterSections('${item.id}')">
                                 ${item.label}
                                 <small style="opacity: 0.7; margin-left: 0.25rem;">(${item.count})</small>
                             </a>
@@ -500,47 +517,37 @@
                 `;
             }
 
-            renderThoughts() {
-                const container = document.getElementById('thoughtsContainer');
+            renderSections() {
+                const container = document.getElementById('contentContainer');
                 const filtered = this.currentFilter === 'all' 
-                    ? this.thoughts 
-                    : this.thoughts.filter(t => t.tags.includes(this.currentFilter));
+                    ? this.sections 
+                    : this.sections.filter(s => s.tags.includes(this.currentFilter));
                 
-                container.innerHTML = filtered.map(thought => `
-                    <article class="thought" id="${thought.id}">
-                        <div class="thought-header">
-                            <a href="#${thought.id}" class="thought-title" onclick="thoughtStream.scrollToThought('${thought.id}')">
-                                ${thought.title}
+                container.innerHTML = filtered.map(section => `
+                    <article class="content-section" id="${section.id}">
+                        <div class="section-header">
+                            <a href="#${section.id}" class="section-title" onclick="markStream.scrollToSection('${section.id}')">
+                                ${section.title}
                             </a>
-                            <span class="thought-date">${this.formatDate(thought.date)}</span>
+                            <span class="section-date">${this.formatDate(section.date)}</span>
                         </div>
                         
-                        <div class="thought-content">
-                            ${this.renderMarkdown(thought.content)}
+                        <div class="section-content">
+                            ${this.renderMarkdown(section.content)}
                         </div>
                         
-                        ${thought.tags.length > 0 ? `
-                            <div class="thought-tags">
-                                ${thought.tags.map(tag => `
-                                    <span class="tag" onclick="thoughtStream.filterThoughts('${tag}')">#${tag}</span>
+                        ${section.tags.length > 0 ? `
+                            <div class="section-tags">
+                                ${section.tags.map(tag => `
+                                    <span class="tag" onclick="markStream.filterSections('${tag}')">#${tag}</span>
                                 `).join('')}
                             </div>
                         ` : ''}
-                        
-                        <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
-                            <button class="btn" onclick="thoughtStream.shareThought('${thought.id}')" style="font-size: 0.75rem;">
-                                🔗 Share
-                            </button>
-                            <button class="btn" onclick="thoughtStream.editThought(${this.thoughts.indexOf(thought)})" style="font-size: 0.75rem;">
-                                ✏️ Edit
-                            </button>
-                        </div>
                     </article>
                 `).join('');
             }
 
             renderMarkdown(text) {
-                // Simple markdown rendering
                 return text
                     .replace(/^### (.*$)/gm, '<h3>$1</h3>')
                     .replace(/^## (.*$)/gm, '<h2>$1</h2>')
@@ -548,29 +555,27 @@
                     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                     .replace(/\*(.*?)\*/g, '<em>$1</em>')
                     .replace(/`([^`]+)`/g, '<code>$1</code>')
-                    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img alt="$1" src="$2" style="max-width:100%;border-radius:8px;margin:1rem 0;">')
+                    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img alt="$1" src="$2" style="max-width:100%;">')
                     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color:var(--primary);">$1</a>')
-                    .replace(/\n\n/g, '</p><p>')
                     .replace(/^\s*-\s+(.*$)/gm, '<li>$1</li>')
                     .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
                     .replace(/^\s*\d+\.\s+(.*$)/gm, '<li>$1</li>')
                     .replace(/(<li>.*<\/li>)/s, '<ol>$1</ol>')
-                    .replace(/^>\s+(.*$)/gm, '<blockquote>$1</blockquote>')
+                    .replace(/^>\s+(.*$)/gm, '<blockquote style="border-left: 3px solid var(--primary); padding-left: 1rem; margin: 1rem 0; color: var(--text-light);">$1</blockquote>')
+                    .replace(/\n\n/g, '</p><p>')
                     .replace(/\n/g, '<br>');
             }
 
-            // ========== ACTIONS ==========
-            filterThoughts(filter) {
+            filterSections(filter) {
                 this.currentFilter = filter;
                 this.render();
                 window.location.hash = filter;
             }
 
-            scrollToThought(id) {
+            scrollToSection(id) {
                 const element = document.getElementById(id);
                 if (element) {
                     element.scrollIntoView({ behavior: 'smooth' });
-                    // Highlight briefly
                     element.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
                     setTimeout(() => {
                         element.style.backgroundColor = '';
@@ -578,51 +583,8 @@
                 }
             }
 
-            shareThought(id) {
-                const thought = this.thoughts.find(t => t.id === id);
-                if (!thought) return;
-                
-                const url = `${window.location.origin}${window.location.pathname}#${id}`;
-                const text = `${thought.title}\n\n${url}`;
-                
-                if (navigator.share) {
-                    navigator.share({
-                        title: thought.title,
-                        text: thought.content.substring(0, 100) + '...',
-                        url: url
-                    });
-                } else {
-                    navigator.clipboard.writeText(text);
-                    alert('Thought link copied to clipboard!');
-                }
-            }
-
-            editThought(index) {
-                const thought = this.thoughts[index];
-                if (!thought) return;
-                
-                // In a real app, this would open GitHub edit interface
-                // For now, show raw markdown for copying
-                prompt('Copy this thought to edit:', thought.raw);
-            }
-
-            // ========== UTILITIES ==========
-            formatDate(dateStr) {
-                const date = new Date(dateStr);
-                const now = new Date();
-                const diff = now - date;
-                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                
-                if (days === 0) return 'Today';
-                if (days === 1) return 'Yesterday';
-                if (days < 7) return `${days} days ago`;
-                if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
-                return date.toLocaleDateString();
-            }
-
             loadTheme() {
-                const saved = localStorage.getItem('theme');
-                if (saved === 'dark') {
+                if (localStorage.getItem('theme') === 'dark') {
                     document.body.classList.add('dark-mode');
                     document.getElementById('themeBtn').textContent = '☀️';
                 }
@@ -657,14 +619,11 @@
                         const url = `https://api.github.com/repos/${CONFIG.github.user}/${CONFIG.github.repo}/contents/${CONFIG.github.file}`;
                         const response = await fetch(url, { headers: { 'If-None-Match': this.lastHash } });
                         
-                        if (response.status === 304) {
-                            // Not modified
-                            return;
-                        }
+                        if (response.status === 304) return;
                         
                         const data = await response.json();
                         if (data.sha !== this.lastHash) {
-                            await this.loadThoughts();
+                            await this.loadContent();
                             console.log('Content updated!');
                         }
                         
@@ -677,63 +636,54 @@
             handleHash() {
                 const hash = window.location.hash.substring(1);
                 if (hash && hash !== this.currentFilter) {
-                    if (hash.startsWith('thought-')) {
-                        this.scrollToThought(hash);
+                    if (hash.startsWith('section-')) {
+                        this.scrollToSection(hash);
                     } else {
-                        this.filterThoughts(hash);
+                        this.filterSections(hash);
                     }
                 }
             }
 
-            loadDemoThoughts() {
-                this.thoughts = [
+            loadDemoContent() {
+                this.sections = [
                     {
-                        id: 'thought-1',
-                        title: 'Welcome to ThoughtStream',
-                        content: 'This is your digital mind. Just edit `thoughts.md` to add or update thoughts.\n\n## How it works:\n1. Write thoughts in markdown\n2. Separate with `---`\n3. That\'s it!',
+                        id: 'section-1',
+                        title: 'Welcome to MarkStream',
+                        content: 'This is your personal content platform. Everything here is loaded from a single markdown file.\n\n## How it works\n1. Write content in markdown\n2. Separate sections with `---`\n3. Add metadata with frontmatter\n4. That\'s it!',
                         date: new Date().toISOString().split('T')[0],
                         tags: ['welcome', 'guide'],
-                        raw: 'title: Welcome to ThoughtStream\ndate: today\ntags: welcome, guide\n---\nThis is your digital mind. Just edit `thoughts.md` to add or update thoughts.\n\n## How it works:\n1. Write thoughts in markdown\n2. Separate with `---`\n3. That\'s it!'
-                    },
-                    {
-                        id: 'thought-2',
-                        title: 'The Future of Personal Websites',
-                        content: 'What if everyone had a simple platform that updated automatically from a single file?\n\n**Benefits:**\n- No complex setup\n- Just write and publish\n- Always in sync\n\nThis is that platform.',
-                        date: new Date(Date.now() - 86400000).toISOString().split('T')[0],
-                        tags: ['ideas', 'technology'],
-                        raw: 'title: The Future of Personal Websites\ndate: yesterday\ntags: ideas, technology\n---\nWhat if everyone had a simple platform that updated automatically from a single file?\n\n**Benefits:**\n- No complex setup\n- Just write and publish\n- Always in sync\n\nThis is that platform.'
+                        raw: 'title: Welcome to MarkStream\ndate: today\ntags: welcome, guide\n---\nThis is your personal content platform. Everything here is loaded from a single markdown file.\n\n## How it works\n1. Write content in markdown\n2. Separate sections with `---`\n3. Add metadata with frontmatter\n4. That\'s it!'
                     }
                 ];
             }
         }
 
         // ========== GLOBAL ==========
-        const thoughtStream = new ThoughtStream();
+        const markStream = new MarkStream();
 
         function scrollToTop() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function toggleTheme() {
-            thoughtStream.toggleTheme();
+            markStream.toggleTheme();
         }
 
         function refreshContent() {
             const btn = document.getElementById('refreshBtn');
             btn.textContent = '⏳';
-            thoughtStream.loadThoughts().finally(() => {
+            markStream.loadContent().finally(() => {
                 btn.textContent = '🔄';
             });
         }
 
-        function editOnGitHub() {
+        function editContent() {
             window.open(
                 `https://github.com/${CONFIG.github.user}/${CONFIG.github.repo}/edit/main/${CONFIG.github.file}`,
                 '_blank'
             );
         }
 
-        // Load theme on start
         if (localStorage.getItem('theme') === 'dark') {
             document.body.classList.add('dark-mode');
         }
