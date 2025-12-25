@@ -347,3 +347,396 @@
                 this.loadTheme();
                 
                 // Load thoughts
+                await this.loadThoughts();
+                
+                // Set up auto-refresh
+                this.startAutoRefresh();
+                
+                // Handle hash navigation
+                window.addEventListener('hashchange', () => this.handleHash());
+                this.handleHash();
+                
+                console.log('ThoughtStream ready!');
+            }
+
+            async loadThoughts() {
+                try {
+                    const url = `https://api.github.com/repos/${CONFIG.github.user}/${CONFIG.github.repo}/contents/${CONFIG.github.file}`;
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    
+                    const content = atob(data.content);
+                    this.parseThoughts(content);
+                    
+                    // Update sync status
+                    this.updateSyncStatus(true, data.sha);
+                    
+                } catch (error) {
+                    console.error('Failed to load:', error);
+                    this.loadDemoThoughts();
+                    this.updateSyncStatus(false);
+                }
+            }
+
+            parseThoughts(content) {
+                // Split by thought separator (---)
+                const sections = content.split('\n---\n');
+                this.thoughts = [];
+                
+                sections.forEach((section, index) => {
+                    if (section.trim()) {
+                        const thought = this.parseThought(section, index);
+                        if (thought) {
+                            this.thoughts.push(thought);
+                        }
+                    }
+                });
+                
+                // Sort by date (newest first)
+                this.thoughts.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                // Update UI
+                this.render();
+            }
+
+            parseThought(text, id) {
+                const lines = text.trim().split('\n');
+                const thought = {
+                    id: `thought-${id}`,
+                    title: 'Untitled Thought',
+                    content: '',
+                    date: new Date().toISOString().split('T')[0],
+                    tags: [],
+                    raw: text
+                };
+                
+                // Parse frontmatter-like format
+                let inFrontmatter = false;
+                let contentLines = [];
+                
+                for (const line of lines) {
+                    if (line.trim() === '---') {
+                        inFrontmatter = !inFrontmatter;
+                        continue;
+                    }
+                    
+                    if (inFrontmatter) {
+                        const match = line.match(/^([^:]+):\s*(.+)$/);
+                        if (match) {
+                            const [, key, value] = match;
+                            const cleanKey = key.trim().toLowerCase();
+                            const cleanValue = value.trim();
+                            
+                            if (cleanKey === 'title') thought.title = cleanValue;
+                            if (cleanKey === 'date') thought.date = cleanValue;
+                            if (cleanKey === 'tags') thought.tags = cleanValue.split(',').map(t => t.trim());
+                        }
+                    } else {
+                        contentLines.push(line);
+                    }
+                }
+                
+                // If no frontmatter, use first line as title
+                if (!inFrontmatter && lines.length > 0) {
+                    const firstLine = lines[0].trim();
+                    if (firstLine.startsWith('# ')) {
+                        thought.title = firstLine.substring(2);
+                        contentLines = lines.slice(1);
+                    } else {
+                        thought.title = firstLine.substring(0, 50) + (firstLine.length > 50 ? '...' : '');
+                        contentLines = lines;
+                    }
+                }
+                
+                thought.content = contentLines.join('\n');
+                return thought;
+            }
+
+            render() {
+                // Update stats
+                this.updateStats();
+                
+                // Render navigation
+                this.renderNavigation();
+                
+                // Render thoughts
+                this.renderThoughts();
+            }
+
+            updateStats() {
+                const totalWords = this.thoughts.reduce((sum, thought) => {
+                    return sum + thought.content.split(/\s+/).length;
+                }, 0);
+                
+                document.getElementById('thoughtCount').textContent = this.thoughts.length;
+                document.getElementById('wordCount').textContent = totalWords.toLocaleString();
+                document.getElementById('lastUpdate').textContent = 'Just now';
+            }
+
+            renderNavigation() {
+                const container = document.getElementById('navContainer');
+                const tags = [...new Set(this.thoughts.flatMap(t => t.tags))].filter(t => t);
+                
+                const items = [
+                    { id: 'all', label: 'All Thoughts', count: this.thoughts.length },
+                    ...tags.map(tag => ({
+                        id: tag,
+                        label: `#${tag}`,
+                        count: this.thoughts.filter(t => t.tags.includes(tag)).length
+                    }))
+                ];
+                
+                container.innerHTML = `
+                    <div class="nav-items">
+                        ${items.map(item => `
+                            <a href="#${item.id}" 
+                               class="nav-item ${this.currentFilter === item.id ? 'active' : ''}"
+                               onclick="thoughtStream.filterThoughts('${item.id}')">
+                                ${item.label}
+                                <small style="opacity: 0.7; margin-left: 0.25rem;">(${item.count})</small>
+                            </a>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            renderThoughts() {
+                const container = document.getElementById('thoughtsContainer');
+                const filtered = this.currentFilter === 'all' 
+                    ? this.thoughts 
+                    : this.thoughts.filter(t => t.tags.includes(this.currentFilter));
+                
+                container.innerHTML = filtered.map(thought => `
+                    <article class="thought" id="${thought.id}">
+                        <div class="thought-header">
+                            <a href="#${thought.id}" class="thought-title" onclick="thoughtStream.scrollToThought('${thought.id}')">
+                                ${thought.title}
+                            </a>
+                            <span class="thought-date">${this.formatDate(thought.date)}</span>
+                        </div>
+                        
+                        <div class="thought-content">
+                            ${this.renderMarkdown(thought.content)}
+                        </div>
+                        
+                        ${thought.tags.length > 0 ? `
+                            <div class="thought-tags">
+                                ${thought.tags.map(tag => `
+                                    <span class="tag" onclick="thoughtStream.filterThoughts('${tag}')">#${tag}</span>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                        
+                        <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                            <button class="btn" onclick="thoughtStream.shareThought('${thought.id}')" style="font-size: 0.75rem;">
+                                🔗 Share
+                            </button>
+                            <button class="btn" onclick="thoughtStream.editThought(${this.thoughts.indexOf(thought)})" style="font-size: 0.75rem;">
+                                ✏️ Edit
+                            </button>
+                        </div>
+                    </article>
+                `).join('');
+            }
+
+            renderMarkdown(text) {
+                // Simple markdown rendering
+                return text
+                    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+                    .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+                    .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/`([^`]+)`/g, '<code>$1</code>')
+                    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img alt="$1" src="$2" style="max-width:100%;border-radius:8px;margin:1rem 0;">')
+                    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color:var(--primary);">$1</a>')
+                    .replace(/\n\n/g, '</p><p>')
+                    .replace(/^\s*-\s+(.*$)/gm, '<li>$1</li>')
+                    .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+                    .replace(/^\s*\d+\.\s+(.*$)/gm, '<li>$1</li>')
+                    .replace(/(<li>.*<\/li>)/s, '<ol>$1</ol>')
+                    .replace(/^>\s+(.*$)/gm, '<blockquote>$1</blockquote>')
+                    .replace(/\n/g, '<br>');
+            }
+
+            // ========== ACTIONS ==========
+            filterThoughts(filter) {
+                this.currentFilter = filter;
+                this.render();
+                window.location.hash = filter;
+            }
+
+            scrollToThought(id) {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                    // Highlight briefly
+                    element.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+                    setTimeout(() => {
+                        element.style.backgroundColor = '';
+                    }, 2000);
+                }
+            }
+
+            shareThought(id) {
+                const thought = this.thoughts.find(t => t.id === id);
+                if (!thought) return;
+                
+                const url = `${window.location.origin}${window.location.pathname}#${id}`;
+                const text = `${thought.title}\n\n${url}`;
+                
+                if (navigator.share) {
+                    navigator.share({
+                        title: thought.title,
+                        text: thought.content.substring(0, 100) + '...',
+                        url: url
+                    });
+                } else {
+                    navigator.clipboard.writeText(text);
+                    alert('Thought link copied to clipboard!');
+                }
+            }
+
+            editThought(index) {
+                const thought = this.thoughts[index];
+                if (!thought) return;
+                
+                // In a real app, this would open GitHub edit interface
+                // For now, show raw markdown for copying
+                prompt('Copy this thought to edit:', thought.raw);
+            }
+
+            // ========== UTILITIES ==========
+            formatDate(dateStr) {
+                const date = new Date(dateStr);
+                const now = new Date();
+                const diff = now - date;
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                
+                if (days === 0) return 'Today';
+                if (days === 1) return 'Yesterday';
+                if (days < 7) return `${days} days ago`;
+                if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
+                return date.toLocaleDateString();
+            }
+
+            loadTheme() {
+                const saved = localStorage.getItem('theme');
+                if (saved === 'dark') {
+                    document.body.classList.add('dark-mode');
+                    document.getElementById('themeBtn').textContent = '☀️';
+                }
+            }
+
+            toggleTheme() {
+                document.body.classList.toggle('dark-mode');
+                const isDark = document.body.classList.contains('dark-mode');
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌙';
+            }
+
+            updateSyncStatus(success, hash = '') {
+                const element = document.getElementById('syncStatus');
+                if (success) {
+                    element.innerHTML = `
+                        <span style="display: inline-block; width: 6px; height: 6px; background: #10b981; border-radius: 50%;"></span>
+                        Synced
+                    `;
+                    this.lastHash = hash;
+                } else {
+                    element.innerHTML = `
+                        <span style="display: inline-block; width: 6px; height: 6px; background: #ef4444; border-radius: 50%;"></span>
+                        Offline
+                    `;
+                }
+            }
+
+            startAutoRefresh() {
+                setInterval(async () => {
+                    try {
+                        const url = `https://api.github.com/repos/${CONFIG.github.user}/${CONFIG.github.repo}/contents/${CONFIG.github.file}`;
+                        const response = await fetch(url, { headers: { 'If-None-Match': this.lastHash } });
+                        
+                        if (response.status === 304) {
+                            // Not modified
+                            return;
+                        }
+                        
+                        const data = await response.json();
+                        if (data.sha !== this.lastHash) {
+                            await this.loadThoughts();
+                            console.log('Content updated!');
+                        }
+                        
+                    } catch (error) {
+                        // Silent fail
+                    }
+                }, CONFIG.updateCheckInterval);
+            }
+
+            handleHash() {
+                const hash = window.location.hash.substring(1);
+                if (hash && hash !== this.currentFilter) {
+                    if (hash.startsWith('thought-')) {
+                        this.scrollToThought(hash);
+                    } else {
+                        this.filterThoughts(hash);
+                    }
+                }
+            }
+
+            loadDemoThoughts() {
+                this.thoughts = [
+                    {
+                        id: 'thought-1',
+                        title: 'Welcome to ThoughtStream',
+                        content: 'This is your digital mind. Just edit `thoughts.md` to add or update thoughts.\n\n## How it works:\n1. Write thoughts in markdown\n2. Separate with `---`\n3. That\'s it!',
+                        date: new Date().toISOString().split('T')[0],
+                        tags: ['welcome', 'guide'],
+                        raw: 'title: Welcome to ThoughtStream\ndate: today\ntags: welcome, guide\n---\nThis is your digital mind. Just edit `thoughts.md` to add or update thoughts.\n\n## How it works:\n1. Write thoughts in markdown\n2. Separate with `---`\n3. That\'s it!'
+                    },
+                    {
+                        id: 'thought-2',
+                        title: 'The Future of Personal Websites',
+                        content: 'What if everyone had a simple platform that updated automatically from a single file?\n\n**Benefits:**\n- No complex setup\n- Just write and publish\n- Always in sync\n\nThis is that platform.',
+                        date: new Date(Date.now() - 86400000).toISOString().split('T')[0],
+                        tags: ['ideas', 'technology'],
+                        raw: 'title: The Future of Personal Websites\ndate: yesterday\ntags: ideas, technology\n---\nWhat if everyone had a simple platform that updated automatically from a single file?\n\n**Benefits:**\n- No complex setup\n- Just write and publish\n- Always in sync\n\nThis is that platform.'
+                    }
+                ];
+            }
+        }
+
+        // ========== GLOBAL ==========
+        const thoughtStream = new ThoughtStream();
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleTheme() {
+            thoughtStream.toggleTheme();
+        }
+
+        function refreshContent() {
+            const btn = document.getElementById('refreshBtn');
+            btn.textContent = '⏳';
+            thoughtStream.loadThoughts().finally(() => {
+                btn.textContent = '🔄';
+            });
+        }
+
+        function editOnGitHub() {
+            window.open(
+                `https://github.com/${CONFIG.github.user}/${CONFIG.github.repo}/edit/main/${CONFIG.github.file}`,
+                '_blank'
+            );
+        }
+
+        // Load theme on start
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+</body>
+</html>
