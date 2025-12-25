@@ -1,52 +1,1127 @@
-// editor.js
-class MarkdownEditor {
-    constructor() {
-        this.input = document.getElementById('markdown-input');
-        this.preview = document.getElementById('markdown-preview');
-        this.setupEventListeners();
-        this.loadSavedContent();
-    }
-
-    setupEventListeners() {
-        this.input.addEventListener('input', () => {
-            this.updatePreview();
-            this.saveContent();
-        });
-    }
-
-    updatePreview() {
-        const markdown = this.input.value;
-        const html = this.convertMarkdown(markdown);
-        this.preview.innerHTML = html;
-    }
-
-    convertMarkdown(text) {
-        return text
-            .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-            .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-            .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.*?)\*/g, '<em>$1</em>')
-            .replace(/`([^`]+)`/g, '<code>$1</code>')
-            .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img alt="$1" src="$2">')
-            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
-            .replace(/\n/g, '<br>');
-    }
-
-    saveContent() {
-        localStorage.setItem('markdown-content', this.input.value);
-    }
-
-    loadSavedContent() {
-        const saved = localStorage.getItem('markdown-content');
-        if (saved) {
-            this.input.value = saved;
-            this.updatePreview();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neocortex | Live Editing Platform</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --surface: #f8fafc;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --primary: #3b82f6;
+            --accent: #8b5cf6;
+            --success: #10b981;
+            --border: #e2e8f0;
+            --radius: 12px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         }
-    }
-}
 
-// Initialize when page loads
-window.addEventListener('DOMContentLoaded', () => {
-    new MarkdownEditor();
-});
+        .dark-mode {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --text: #f1f5f9;
+            --text-light: #94a3b8;
+            --border: #334155;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* Header */
+        .header {
+            position: sticky;
+            top: 0;
+            background: var(--surface);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            padding: 1rem 0;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+            border: none;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        /* Navigation */
+        .nav {
+            margin: 2rem 0;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 0.5rem;
+        }
+
+        .nav-items {
+            display: inline-flex;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            text-decoration: none;
+            color: var(--text-light);
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Content */
+        .content-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .content-section:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .content-section.editing {
+            border: 2px solid var(--primary);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--text);
+            text-decoration: none;
+            flex: 1;
+        }
+
+        .section-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-left: 1rem;
+        }
+
+        .action-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-light);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: var(--surface);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .section-date {
+            color: var(--text-light);
+            font-size: 0.875rem;
+            white-space: nowrap;
+        }
+
+        .section-content {
+            color: var(--text);
+            line-height: 1.8;
+        }
+
+        .section-content h2,
+        .section-content h3 {
+            margin: 1.5rem 0 1rem;
+        }
+
+        .section-content p {
+            margin: 1rem 0;
+        }
+
+        .section-content code {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .section-content pre {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .section-content img {
+            max-width: 100%;
+            border-radius: var(--radius);
+            margin: 1rem 0;
+        }
+
+        .section-tags {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .tag:hover {
+            background: rgba(59, 130, 246, 0.2);
+        }
+
+        /* Editor */
+        .editor-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .editor-container.active {
+            display: block;
+        }
+
+        .editor {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 2rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .editor-title {
+            font-size: 1.25rem;
+            color: var(--text);
+        }
+
+        .editor-close {
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .editor-close:hover {
+            color: var(--primary);
+        }
+
+        .editor-input {
+            width: 100%;
+            min-height: 400px;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            resize: vertical;
+            margin-bottom: 1rem;
+        }
+
+        .editor-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        /* FAB */
+        .fab {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            color: var(--text-light);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(59, 130, 246, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: var(--surface);
+            color: var(--text);
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            z-index: 1001;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .notification.error {
+            border-left: 4px solid #ef4444;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .content-section {
+                padding: 1.5rem;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .editor {
+                padding: 1rem;
+                margin: 1rem;
+            }
+            
+            .editor-input {
+                min-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Editor Modal -->
+    <div class="editor-container" id="editorContainer">
+        <div class="editor">
+            <div class="editor-header">
+                <div class="editor-title" id="editorTitle">Edit Content</div>
+                <button class="editor-close" onclick="closeEditor()">×</button>
+            </div>
+            <textarea class="editor-input" id="editorInput" spellcheck="false"></textarea>
+            <div class="editor-actions">
+                <button class="btn" onclick="closeEditor()">Cancel</button>
+                <button class="btn btn-success" onclick="saveContent()" id="saveBtn">💾 Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="#" class="logo" onclick="scrollToTop()">🧠 Neocortex</a>
+                <div class="controls">
+                    <button class="btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+                    <button class="btn btn-primary" onclick="openEditor('new')">+ New Thought</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Navigation -->
+        <nav class="nav" id="navContainer"></nav>
+
+        <!-- Search -->
+        <div style="margin: 1rem 0;">
+            <input type="text" 
+                   id="searchInput" 
+                   placeholder="🔍 Search thoughts..." 
+                   style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text);">
+        </div>
+
+        <!-- Content Sections -->
+        <div id="contentContainer">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading your thoughts...</p>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="content-section" id="statsSection">
+            <h3>📊 My Digital Mind</h3>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1rem;">
+                <div style="text-align: center;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--primary);" id="sectionCount">0</div>
+                    <small>Thoughts</small>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--accent);" id="wordCount">0</div>
+                    <small>Total Words</small>
+                </div>
+            </div>
+            <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-light);">
+                <span id="syncStatus" style="display: inline-flex; align-items: center; gap: 0.25rem;">
+                    <span style="display: inline-block; width: 6px; height: 6px; background: #ef4444; border-radius: 50%;"></span>
+                    Loading...
+                </span>
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>Powered by Neocortex • Edit directly or via <code>neocortex.md</code></p>
+            <p style="margin-top: 0.5rem; font-size: 0.75rem;">
+                Changes sync automatically with GitHub
+            </p>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // ========== CONFIG ==========
+        const CONFIG = {
+            github: {
+                user: 'Baraka124',
+                repo: 'neocortex-platform',
+                file: 'neocortex.md',
+                branch: 'main',
+                token: '' // Leave empty for public repo
+            },
+            autoSave: true,
+            saveDelay: 2000 // Auto-save after 2 seconds of inactivity
+        };
+
+        // ========== CORE ==========
+        class Neocortex {
+            constructor() {
+                this.sections = [];
+                this.currentFilter = 'all';
+                this.editingSection = null;
+                this.originalContent = '';
+                this.autoSaveTimer = null;
+                this.init();
+            }
+
+            async init() {
+                this.loadTheme();
+                await this.loadContent();
+                this.setupSearch();
+                this.render();
+                this.startAutoRefresh();
+                console.log('🧠 Neocortex Platform Activated');
+            }
+
+            async loadContent() {
+                try {
+                    const rawUrl = `https://raw.githubusercontent.com/${CONFIG.github.user}/${CONFIG.github.repo}/main/${CONFIG.github.file}`;
+                    const response = await fetch(rawUrl + '?t=' + Date.now());
+                    
+                    if (response.ok) {
+                        const content = await response.text();
+                        this.parseContent(content);
+                        this.showNotification('Content loaded', 'success');
+                        this.updateSyncStatus(true);
+                    } else {
+                        throw new Error('Could not load content');
+                    }
+                    
+                } catch (error) {
+                    console.error('Failed to load:', error);
+                    this.loadDemoContent();
+                    this.updateSyncStatus(false);
+                    this.showNotification('Using demo content', 'error');
+                }
+            }
+
+            parseContent(content) {
+                const rawSections = content.split(/\n---\n/);
+                this.sections = [];
+                
+                rawSections.forEach((section, index) => {
+                    if (section.trim()) {
+                        const parsed = this.parseSection(section, index);
+                        if (parsed) {
+                            this.sections.push(parsed);
+                        }
+                    }
+                });
+                
+                // Save original content
+                this.originalContent = content;
+            }
+
+            parseSection(text, id) {
+                const lines = text.trim().split('\n');
+                const section = {
+                    id: id,
+                    title: 'Untitled Thought',
+                    content: '',
+                    date: new Date().toISOString().split('T')[0],
+                    tags: [],
+                    raw: text
+                };
+                
+                let inFrontmatter = false;
+                let contentLines = [];
+                let frontmatterLines = [];
+                
+                for (const line of lines) {
+                    if (line.trim() === '---') {
+                        inFrontmatter = !inFrontmatter;
+                        continue;
+                    }
+                    
+                    if (inFrontmatter) {
+                        frontmatterLines.push(line);
+                        const match = line.match(/^([^:]+):\s*(.+)$/);
+                        if (match) {
+                            const [, key, value] = match;
+                            const cleanKey = key.trim().toLowerCase();
+                            const cleanValue = value.trim();
+                            
+                            if (cleanKey === 'title') section.title = cleanValue;
+                            if (cleanKey === 'date') section.date = cleanValue;
+                            if (cleanKey === 'tags') section.tags = cleanValue.split(',').map(t => t.trim());
+                        }
+                    } else {
+                        contentLines.push(line);
+                    }
+                }
+                
+                section.content = contentLines.join('\n');
+                section.frontmatter = frontmatterLines.join('\n');
+                return section;
+            }
+
+            render() {
+                if (this.sections.length === 0) {
+                    this.showNoContent();
+                    return;
+                }
+                
+                this.updateStats();
+                this.renderNavigation();
+                this.renderSections();
+            }
+
+            showNoContent() {
+                const container = document.getElementById('contentContainer');
+                container.innerHTML = `
+                    <div class="content-section">
+                        <h3>Start Writing ✍️</h3>
+                        <p>Your digital mind is empty. Start by adding your first thought!</p>
+                        <button class="btn btn-primary" onclick="openEditor('new')" style="margin-top: 1rem;">
+                            + Create First Thought
+                        </button>
+                    </div>
+                `;
+            }
+
+            updateStats() {
+                const totalWords = this.sections.reduce((sum, section) => {
+                    return sum + section.content.split(/\s+/).length;
+                }, 0);
+                
+                document.getElementById('sectionCount').textContent = this.sections.length;
+                document.getElementById('wordCount').textContent = totalWords.toLocaleString();
+            }
+
+            renderNavigation() {
+                const container = document.getElementById('navContainer');
+                const tags = [...new Set(this.sections.flatMap(s => s.tags))].filter(t => t);
+                
+                const items = [
+                    { id: 'all', label: 'All Thoughts', count: this.sections.length },
+                    ...tags.map(tag => ({
+                        id: tag,
+                        label: `#${tag}`,
+                        count: this.sections.filter(s => s.tags.includes(tag)).length
+                    }))
+                ];
+                
+                container.innerHTML = `
+                    <div class="nav-items">
+                        ${items.map(item => `
+                            <a href="#${item.id}" 
+                               class="nav-item ${this.currentFilter === item.id ? 'active' : ''}"
+                               onclick="neocortex.filterSections('${item.id}')">
+                                ${item.label}
+                                <small style="opacity: 0.7; margin-left: 0.25rem;">(${item.count})</small>
+                            </a>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            renderSections() {
+                const container = document.getElementById('contentContainer');
+                const filtered = this.currentFilter === 'all' 
+                    ? this.sections 
+                    : this.sections.filter(s => s.tags.includes(this.currentFilter));
+                
+                container.innerHTML = filtered.map(section => {
+                    const wordCount = section.content.split(/\s+/).length;
+                    return `
+                        <article class="content-section" id="section-${section.id}">
+                            <div class="section-header">
+                                <div>
+                                    <h2 class="section-title">${section.title}</h2>
+                                    <div style="display: flex; gap: 0.5rem; margin-top: 0.25rem;">
+                                        <span class="section-date">${this.formatDate(section.date)}</span>
+                                        <span style="color: var(--text-light);">•</span>
+                                        <span style="color: var(--text-light); font-size: 0.875rem;">${wordCount} words</span>
+                                    </div>
+                                </div>
+                                <div class="section-actions">
+                                    <button class="action-btn" onclick="neocortex.editSection(${section.id})" title="Edit">
+                                        ✏️
+                                    </button>
+                                    <button class="action-btn" onclick="neocortex.deleteSection(${section.id})" title="Delete">
+                                        🗑️
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="section-content">
+                                ${this.renderMarkdown(section.content)}
+                            </div>
+                            
+                            ${section.tags.length > 0 ? `
+                                <div class="section-tags">
+                                    ${section.tags.map(tag => `
+                                        <span class="tag" onclick="neocortex.filterSections('${tag}')">#${tag}</span>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        </article>
+                    `;
+                }).join('');
+            }
+
+            renderMarkdown(text) {
+                return text
+                    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+                    .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+                    .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/`([^`]+)`/g, '<code>$1</code>')
+                    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img alt="$1" src="$2" style="max-width:100%;">')
+                    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color:var(--primary);">$1</a>')
+                    .replace(/^\s*-\s+(.*$)/gm, '<li>$1</li>')
+                    .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+                    .replace(/^\s*\d+\.\s+(.*$)/gm, '<li>$1</li>')
+                    .replace(/(<li>.*<\/li>)/s, '<ol>$1</ol>')
+                    .replace(/^>\s+(.*$)/gm, '<blockquote style="border-left: 3px solid var(--primary); padding-left: 1rem; margin: 1rem 0; color: var(--text-light);">$1</blockquote>')
+                    .replace(/\n\n/g, '</p><p>')
+                    .replace(/\n/g, '<br>');
+            }
+
+            // ========== EDITING ==========
+            editSection(id) {
+                const section = this.sections.find(s => s.id === id);
+                if (!section) return;
+                
+                this.editingSection = section;
+                this.openEditor(section);
+            }
+
+            openEditor(section) {
+                const editor = document.getElementById('editorContainer');
+                const input = document.getElementById('editorInput');
+                const title = document.getElementById('editorTitle');
+                
+                if (section === 'new') {
+                    title.textContent = 'New Thought';
+                    input.value = `---
+title: New Thought
+date: ${new Date().toISOString().split('T')[0]}
+tags: idea, draft
+---
+
+# Your New Thought
+
+Start writing here...`;
+                } else {
+                    title.textContent = `Edit: ${section.title}`;
+                    input.value = section.raw;
+                }
+                
+                editor.classList.add('active');
+                input.focus();
+                
+                // Setup auto-save
+                if (CONFIG.autoSave) {
+                    input.addEventListener('input', () => {
+                        this.scheduleAutoSave();
+                    });
+                }
+            }
+
+            scheduleAutoSave() {
+                clearTimeout(this.autoSaveTimer);
+                this.autoSaveTimer = setTimeout(() => {
+                    this.saveToGitHub();
+                }, CONFIG.saveDelay);
+            }
+
+            async saveToGitHub() {
+                const input = document.getElementById('editorInput');
+                const newContent = input.value;
+                
+                if (newContent === this.originalContent) {
+                    this.showNotification('No changes to save', 'error');
+                    return;
+                }
+
+                try {
+                    this.showNotification('Saving to GitHub...', 'success');
+                    
+                    // Get current file SHA
+                    const apiUrl = `https://api.github.com/repos/${CONFIG.github.user}/${CONFIG.github.repo}/contents/${CONFIG.github.file}`;
+                    const response = await fetch(apiUrl);
+                    const fileData = await response.json();
+                    
+                    // Update file
+                    const updateResponse = await fetch(apiUrl, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': CONFIG.github.token ? `token ${CONFIG.github.token}` : ''
+                        },
+                        body: JSON.stringify({
+                            message: `Update content via Neocortex ${new Date().toISOString()}`,
+                            content: btoa(unescape(encodeURIComponent(newContent))),
+                            sha: fileData.sha,
+                            branch: CONFIG.github.branch
+                        })
+                    });
+
+                    if (updateResponse.ok) {
+                        this.originalContent = newContent;
+                        await this.loadContent();
+                        this.render();
+                        this.showNotification('Saved successfully!', 'success');
+                    } else {
+                        throw new Error('GitHub API error');
+                    }
+                    
+                } catch (error) {
+                    console.error('Save failed:', error);
+                    this.showNotification('Failed to save. Opening GitHub editor...', 'error');
+                    
+                    // Fallback: Open GitHub editor
+                    setTimeout(() => {
+                        window.open(
+                            `https://github.com/${CONFIG.github.user}/${CONFIG.github.repo}/edit/main/${CONFIG.github.file}`,
+                            '_blank'
+                        );
+                    }, 1000);
+                }
+            }
+
+            async deleteSection(id) {
+                if (!confirm('Delete this thought? This cannot be undone.')) return;
+                
+                const section = this.sections.find(s => s.id === id);
+                if (!section) return;
+                
+                // Remove section from content
+                const sections = this.originalContent.split(/\n---\n/);
+                const newSections = sections.filter((_, index) => index !== id);
+                const newContent = newSections.join('\n---\n');
+                
+                try {
+                    // Update on GitHub
+                    const apiUrl = `https://api.github.com/repos/${CONFIG.github.user}/${CONFIG.github.repo}/contents/${CONFIG.github.file}`;
+                    const response = await fetch(apiUrl);
+                    const fileData = await response.json();
+                    
+                    await fetch(apiUrl, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: `Delete thought: ${section.title}`,
+                            content: btoa(unescape(encodeURIComponent(newContent))),
+                            sha: fileData.sha
+                        })
+                    });
+                    
+                    await this.loadContent();
+                    this.render();
+                    this.showNotification('Thought deleted', 'success');
+                    
+                } catch (error) {
+                    console.error('Delete failed:', error);
+                    this.showNotification('Delete failed. Please try on GitHub.', 'error');
+                }
+            }
+
+            // ========== SEARCH ==========
+            setupSearch() {
+                const searchInput = document.getElementById('searchInput');
+                searchInput.addEventListener('input', (e) => {
+                    this.searchContent(e.target.value);
+                });
+            }
+
+            searchContent(query) {
+                if (!query.trim()) {
+                    this.renderSections();
+                    return;
+                }
+                
+                const container = document.getElementById('contentContainer');
+                const results = this.sections.filter(section => 
+                    section.title.toLowerCase().includes(query.toLowerCase()) ||
+                    section.content.toLowerCase().includes(query.toLowerCase()) ||
+                    section.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
+                );
+                
+                if (results.length === 0) {
+                    container.innerHTML = `
+                        <div class="content-section">
+                            <h3>No results found</h3>
+                            <p>Try different search terms or <a href="#" onclick="neocortex.filterSections('all')">view all thoughts</a></p>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = results.map(section => `
+                        <article class="content-section" id="section-${section.id}">
+                            <div class="section-header">
+                                <h2 class="section-title">${section.title}</h2>
+                                <span class="section-date">${this.formatDate(section.date)}</span>
+                            </div>
+                            <div class="section-content">
+                                ${this.highlightSearch(this.renderMarkdown(section.content), query)}
+                            </div>
+                        </article>
+                    `).join('');
+                }
+            }
+
+            highlightSearch(text, query) {
+                if (!query) return text;
+                const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                return text.replace(regex, '<mark style="background: rgba(59, 130, 246, 0.3);">$1</mark>');
+            }
+
+            // ========== UTILITIES ==========
+            filterSections(filter) {
+                this.currentFilter = filter;
+                this.renderSections();
+                window.location.hash = filter;
+            }
+
+            formatDate(dateStr) {
+                try {
+                    const date = new Date(dateStr);
+                    const now = new Date();
+                    const diff = now - date;
+                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    
+                    if (days === 0) return 'Today';
+                    if (days === 1) return 'Yesterday';
+                    if (days < 7) return `${days} days ago`;
+                    if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
+                    return date.toLocaleDateString();
+                } catch {
+                    return 'Recent';
+                }
+            }
+
+            loadTheme() {
+                if (localStorage.getItem('theme') === 'dark') {
+                    document.body.classList.add('dark-mode');
+                    document.getElementById('themeBtn').textContent = '☀️';
+                }
+            }
+
+            toggleTheme() {
+                document.body.classList.toggle('dark-mode');
+                const isDark = document.body.classList.contains('dark-mode');
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌙';
+            }
+
+            updateSyncStatus(success) {
+                const element = document.getElementById('syncStatus');
+                if (success) {
+                    element.innerHTML = `
+                        <span style="display: inline-block; width: 6px; height: 6px; background: #10b981; border-radius: 50%;"></span>
+                        Synced with GitHub
+                    `;
+                } else {
+                    element.innerHTML = `
+                        <span style="display: inline-block; width: 6px; height: 6px; background: #f59e0b; border-radius: 50%;"></span>
+                        Offline Mode
+                    `;
+                }
+            }
+
+            startAutoRefresh() {
+                setInterval(async () => {
+                    try {
+                        const rawUrl = `https://raw.githubusercontent.com/${CONFIG.github.user}/${CONFIG.github.repo}/main/${CONFIG.github.file}`;
+                        const response = await fetch(rawUrl + '?t=' + Date.now());
+                        
+                        if (response.ok) {
+                            const newContent = await response.text();
+                            if (newContent !== this.originalContent) {
+                                console.log('Content updated from GitHub');
+                                this.parseContent(newContent);
+                                this.render();
+                                this.showNotification('Content updated', 'success');
+                            }
+                        }
+                    } catch (error) {
+                        // Silent fail
+                    }
+                }, 30000); // Check every 30 seconds
+            }
+
+            showNotification(message, type = 'success') {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.className = `notification ${type}`;
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+
+            loadDemoContent() {
+                this.sections = [
+                    {
+                        id: 0,
+                        title: 'Welcome to Neocortex',
+                        content: 'This is your personal platform with **live editing**. Try editing this text directly!\n\n## Features\n- Edit directly on the website\n- Auto-saves to GitHub\n- Real-time updates\n- Search functionality\n- Tag organization',
+                        date: new Date().toISOString().split('T')[0],
+                        tags: ['welcome', 'demo'],
+                        raw: `---
+title: Welcome to Neocortex
+date: ${new Date().toISOString().split('T')[0]}
+tags: welcome, demo
+---
+
+# Welcome to Neocortex
+
+This is your personal platform with **live editing**. Try editing this text directly!
+
+## Features
+- Edit directly on the website
+- Auto-saves to GitHub
+- Real-time updates
+- Search functionality
+- Tag organization`,
+                        frontmatter: `title: Welcome to Neocortex\ndate: ${new Date().toISOString().split('T')[0]}\ntags: welcome, demo`
+                    }
+                ];
+                this.originalContent = this.sections[0].raw;
+            }
+        }
+
+        // ========== GLOBAL FUNCTIONS ==========
+        const neocortex = new Neocortex();
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleTheme() {
+            neocortex.toggleTheme();
+        }
+
+        function openEditor(section) {
+            neocortex.openEditor(section);
+        }
+
+        function closeEditor() {
+            document.getElementById('editorContainer').classList.remove('active');
+            neocortex.editingSection = null;
+        }
+
+        function saveContent() {
+            neocortex.saveToGitHub();
+            closeEditor();
+        }
+
+        // Load saved theme
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+
+        // Handle hash navigation
+        window.addEventListener('hashchange', () => {
+            const hash = window.location.hash.substring(1);
+            if (hash && hash !== neocortex.currentFilter) {
+                neocortex.filterSections(hash);
+            }
+        });
+    </script>
+</body>
+    </html>
