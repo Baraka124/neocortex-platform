@@ -1,6 +1,6 @@
 ---
 title: Welcome to My Neocortex 🧠
-date: 2024-01-15
+date: 2025-12-25
 tags: welcome, introduction, personal
 ---
 
