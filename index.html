@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MarkStream | Your Thoughts, Beautifully Rendered</title>
+    <title>Neocortex | Baraka's Digital Mind</title>
     <style>
         :root {
             --bg: #ffffff;
@@ -283,6 +283,22 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Error */
+        .error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: var(--radius);
+            padding: 2rem;
+            text-align: center;
+            margin: 2rem 0;
+            color: #dc2626;
+        }
+
+        .dark-mode .error {
+            background: rgba(220, 38, 38, 0.1);
+            border-color: rgba(220, 38, 38, 0.3);
+        }
+
         /* Responsive */
         @media (max-width: 640px) {
             .container {
@@ -304,7 +320,7 @@
     <div class="header">
         <div class="container">
             <div class="header-content">
-                <a href="#" class="logo" onclick="scrollToTop()">📖 MarkStream</a>
+                <a href="#" class="logo" onclick="scrollToTop()">🧠 Neocortex</a>
                 <div class="controls">
                     <button class="btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
                     <button class="btn" onclick="refreshContent()" id="refreshBtn">🔄</button>
@@ -322,17 +338,17 @@
         <div id="contentContainer">
             <div class="loading">
                 <div class="spinner"></div>
-                <p>Loading your content...</p>
+                <p>Loading your thoughts...</p>
             </div>
         </div>
 
         <!-- Stats -->
         <div class="content-section" id="statsSection">
-            <h3>📊 Content Overview</h3>
+            <h3>📊 My Digital Mind</h3>
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1rem;">
                 <div style="text-align: center;">
                     <div style="font-size: 2rem; font-weight: bold; color: var(--primary);" id="sectionCount">0</div>
-                    <small>Sections</small>
+                    <small>Thoughts</small>
                 </div>
                 <div style="text-align: center;">
                     <div style="font-size: 2rem; font-weight: bold; color: var(--accent);" id="wordCount">0</div>
@@ -345,7 +361,7 @@
         </div>
 
         <div class="footer">
-            <p>Powered by MarkStream • Just edit <code>content.md</code> to update everything</p>
+            <p>Powered by Neocortex • Just edit <code>neocortex.md</code> to update everything</p>
             <p style="margin-top: 0.5rem; font-size: 0.75rem;">
                 <span id="syncStatus" style="display: inline-flex; align-items: center; gap: 0.25rem;">
                     <span style="display: inline-block; width: 6px; height: 6px; background: #ef4444; border-radius: 50%;"></span>
@@ -361,52 +377,70 @@
         // ========== CONFIG ==========
         const CONFIG = {
             github: {
-                user: 'Baraka124',     // ← Change this!
-                repo: 'neocortex-platform',    // ← Change this!
-                file: 'content.md'          // Your markdown file
-            },
-            updateCheckInterval: 30000, // 30 seconds
-            cacheDuration: 5 * 60 * 1000 // 5 minutes
+                user: 'Baraka124',
+                repo: 'neocortex-platform',
+                file: 'neocortex.md'
+            }
         };
 
         // ========== CORE ==========
-        class MarkStream {
+        class Neocortex {
             constructor() {
                 this.sections = [];
                 this.currentFilter = 'all';
-                this.lastHash = '';
                 this.init();
             }
 
             async init() {
                 this.loadTheme();
                 await this.loadContent();
-                this.startAutoRefresh();
-                window.addEventListener('hashchange', () => this.handleHash());
-                this.handleHash();
-                console.log('MarkStream ready!');
+                this.render();
+                console.log('🧠 Neocortex Platform Activated');
             }
 
             async loadContent() {
                 try {
-                    const url = `https://api.github.com/repos/${CONFIG.github.user}/${CONFIG.github.repo}/contents/${CONFIG.github.file}`;
-                    const response = await fetch(url);
-                    const data = await response.json();
+                    // Try GitHub API first
+                    const apiUrl = `https://api.github.com/repos/${CONFIG.github.user}/${CONFIG.github.repo}/contents/${CONFIG.github.file}`;
+                    const response = await fetch(apiUrl);
                     
-                    const content = atob(data.content);
-                    this.parseContent(content);
-                    
-                    this.updateSyncStatus(true, data.sha);
+                    if (response.ok) {
+                        const data = await response.json();
+                        const content = atob(data.content);
+                        this.parseContent(content);
+                        this.updateSyncStatus(true);
+                    } else {
+                        // Fallback to raw content
+                        await this.loadRawContent();
+                    }
                     
                 } catch (error) {
-                    console.error('Failed to load:', error);
+                    console.log('GitHub API failed, trying raw content...');
+                    await this.loadRawContent();
+                }
+            }
+
+            async loadRawContent() {
+                try {
+                    const rawUrl = `https://raw.githubusercontent.com/${CONFIG.github.user}/${CONFIG.github.repo}/main/${CONFIG.github.file}`;
+                    const response = await fetch(rawUrl);
+                    
+                    if (response.ok) {
+                        const content = await response.text();
+                        this.parseContent(content);
+                        this.updateSyncStatus(true);
+                    } else {
+                        throw new Error('Could not load content');
+                    }
+                    
+                } catch (error) {
+                    console.log('Raw content failed, loading demo content...');
                     this.loadDemoContent();
                     this.updateSyncStatus(false);
                 }
             }
 
             parseContent(content) {
-                // Split by section separator (--- with newlines)
                 const rawSections = content.split(/\n---\n/);
                 this.sections = [];
                 
@@ -418,15 +452,13 @@
                         }
                     }
                 });
-                
-                this.render();
             }
 
             parseSection(text, id) {
                 const lines = text.trim().split('\n');
                 const section = {
                     id: `section-${id}`,
-                    title: 'Untitled',
+                    title: 'Untitled Thought',
                     content: '',
                     date: new Date().toISOString().split('T')[0],
                     tags: [],
@@ -458,7 +490,6 @@
                     }
                 }
                 
-                // If no frontmatter, use first line as title
                 if (!inFrontmatter && lines.length > 0) {
                     const firstLine = lines[0].trim();
                     if (firstLine.startsWith('# ')) {
@@ -475,9 +506,31 @@
             }
 
             render() {
+                if (this.sections.length === 0) {
+                    this.showError('No content found. Please make sure neocortex.md exists in your repository.');
+                    return;
+                }
+                
                 this.updateStats();
                 this.renderNavigation();
                 this.renderSections();
+            }
+
+            showError(message) {
+                const container = document.getElementById('contentContainer');
+                container.innerHTML = `
+                    <div class="error">
+                        <h3>⚠️ Content Error</h3>
+                        <p>${message}</p>
+                        <p style="margin-top: 1rem; font-size: 0.875rem;">
+                            <a href="https://github.com/Baraka124/neocortex-platform/edit/main/neocortex.md" 
+                               target="_blank"
+                               style="color: var(--primary); text-decoration: none;">
+                                Create your neocortex.md file →
+                            </a>
+                        </p>
+                    </div>
+                `;
             }
 
             updateStats() {
@@ -495,7 +548,7 @@
                 const tags = [...new Set(this.sections.flatMap(s => s.tags))].filter(t => t);
                 
                 const items = [
-                    { id: 'all', label: 'All Content', count: this.sections.length },
+                    { id: 'all', label: 'All Thoughts', count: this.sections.length },
                     ...tags.map(tag => ({
                         id: tag,
                         label: `#${tag}`,
@@ -508,7 +561,7 @@
                         ${items.map(item => `
                             <a href="#${item.id}" 
                                class="nav-item ${this.currentFilter === item.id ? 'active' : ''}"
-                               onclick="markStream.filterSections('${item.id}')">
+                               onclick="neocortex.filterSections('${item.id}')">
                                 ${item.label}
                                 <small style="opacity: 0.7; margin-left: 0.25rem;">(${item.count})</small>
                             </a>
@@ -526,7 +579,7 @@
                 container.innerHTML = filtered.map(section => `
                     <article class="content-section" id="${section.id}">
                         <div class="section-header">
-                            <a href="#${section.id}" class="section-title" onclick="markStream.scrollToSection('${section.id}')">
+                            <a href="#${section.id}" class="section-title" onclick="neocortex.scrollToSection('${section.id}')">
                                 ${section.title}
                             </a>
                             <span class="section-date">${this.formatDate(section.date)}</span>
@@ -539,7 +592,7 @@
                         ${section.tags.length > 0 ? `
                             <div class="section-tags">
                                 ${section.tags.map(tag => `
-                                    <span class="tag" onclick="markStream.filterSections('${tag}')">#${tag}</span>
+                                    <span class="tag" onclick="neocortex.filterSections('${tag}')">#${tag}</span>
                                 `).join('')}
                             </div>
                         ` : ''}
@@ -568,7 +621,7 @@
 
             filterSections(filter) {
                 this.currentFilter = filter;
-                this.render();
+                this.renderSections();
                 window.location.hash = filter;
             }
 
@@ -597,50 +650,18 @@
                 document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌙';
             }
 
-            updateSyncStatus(success, hash = '') {
+            updateSyncStatus(success) {
                 const element = document.getElementById('syncStatus');
                 if (success) {
                     element.innerHTML = `
                         <span style="display: inline-block; width: 6px; height: 6px; background: #10b981; border-radius: 50%;"></span>
-                        Synced
+                        Live
                     `;
-                    this.lastHash = hash;
                 } else {
                     element.innerHTML = `
-                        <span style="display: inline-block; width: 6px; height: 6px; background: #ef4444; border-radius: 50%;"></span>
-                        Offline
+                        <span style="display: inline-block; width: 6px; height: 6px; background: #f59e0b; border-radius: 50%;"></span>
+                        Demo Mode
                     `;
-                }
-            }
-
-            startAutoRefresh() {
-                setInterval(async () => {
-                    try {
-                        const url = `https://api.github.com/repos/${CONFIG.github.user}/${CONFIG.github.repo}/contents/${CONFIG.github.file}`;
-                        const response = await fetch(url, { headers: { 'If-None-Match': this.lastHash } });
-                        
-                        if (response.status === 304) return;
-                        
-                        const data = await response.json();
-                        if (data.sha !== this.lastHash) {
-                            await this.loadContent();
-                            console.log('Content updated!');
-                        }
-                        
-                    } catch (error) {
-                        // Silent fail
-                    }
-                }, CONFIG.updateCheckInterval);
-            }
-
-            handleHash() {
-                const hash = window.location.hash.substring(1);
-                if (hash && hash !== this.currentFilter) {
-                    if (hash.startsWith('section-')) {
-                        this.scrollToSection(hash);
-                    } else {
-                        this.filterSections(hash);
-                    }
                 }
             }
 
@@ -648,42 +669,61 @@
                 this.sections = [
                     {
                         id: 'section-1',
-                        title: 'Welcome to MarkStream',
-                        content: 'This is your personal content platform. Everything here is loaded from a single markdown file.\n\n## How it works\n1. Write content in markdown\n2. Separate sections with `---`\n3. Add metadata with frontmatter\n4. That\'s it!',
+                        title: 'Welcome to Neocortex',
+                        content: 'This is your personal digital mind. To start adding your own content:\n\n1. Go to [Edit Content](https://github.com/Baraka124/neocortex-platform/edit/main/neocortex.md)\n2. Replace this demo content with your own\n3. Click "Commit changes"\n4. Refresh this page\n\n## Features\n- **Automatic updates** - Edit markdown → instant site update\n- **Tag-based filtering** - Organize your thoughts\n- **Dark/light mode** - Click the theme button\n- **Mobile responsive** - Works everywhere\n- **Zero maintenance** - No servers, no databases\n\n## Quick Start\nAdd new sections by separating with `---`:\n```markdown\n---\ntitle: Your New Thought\ndate: 2024-01-16\ntags: ideas, projects\n---\n\n# Your Title\n\nYour content here...\n```',
                         date: new Date().toISOString().split('T')[0],
                         tags: ['welcome', 'guide'],
-                        raw: 'title: Welcome to MarkStream\ndate: today\ntags: welcome, guide\n---\nThis is your personal content platform. Everything here is loaded from a single markdown file.\n\n## How it works\n1. Write content in markdown\n2. Separate sections with `---`\n3. Add metadata with frontmatter\n4. That\'s it!'
+                        raw: ''
                     }
                 ];
+            }
+
+            formatDate(dateStr) {
+                try {
+                    const date = new Date(dateStr);
+                    const now = new Date();
+                    const diff = now - date;
+                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    
+                    if (days === 0) return 'Today';
+                    if (days === 1) return 'Yesterday';
+                    if (days < 7) return `${days} days ago`;
+                    if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
+                    return date.toLocaleDateString();
+                } catch {
+                    return 'Recent';
+                }
             }
         }
 
         // ========== GLOBAL ==========
-        const markStream = new MarkStream();
+        const neocortex = new Neocortex();
 
         function scrollToTop() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function toggleTheme() {
-            markStream.toggleTheme();
+            neocortex.toggleTheme();
         }
 
         function refreshContent() {
             const btn = document.getElementById('refreshBtn');
             btn.textContent = '⏳';
-            markStream.loadContent().finally(() => {
+            neocortex.loadContent().then(() => {
+                neocortex.render();
                 btn.textContent = '🔄';
             });
         }
 
         function editContent() {
             window.open(
-                `https://github.com/${CONFIG.github.user}/${CONFIG.github.repo}/edit/main/${CONFIG.github.file}`,
+                `https://github.com/Baraka124/neocortex-platform/edit/main/neocortex.md`,
                 '_blank'
             );
         }
 
+        // Load saved theme
         if (localStorage.getItem('theme') === 'dark') {
             document.body.classList.add('dark-mode');
         }
