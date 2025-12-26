@@ -317,6 +317,23 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Copy Button */
+        .copy-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            margin-top: 1rem;
+        }
+
+        .copy-btn:hover {
+            background: #2563eb;
+        }
+
         /* Responsive */
         @media (max-width: 640px) {
             .container {
@@ -358,8 +375,11 @@
             <textarea class="editor-textarea" id="editorTextarea" spellcheck="false"></textarea>
             <div class="editor-actions">
                 <button class="btn" onclick="closeEditor()">Cancel</button>
-                <button class="btn btn-success" onclick="saveContent()">💾 Save Changes</button>
+                <button class="btn btn-success" onclick="saveContent()">💾 Copy to Clipboard</button>
             </div>
+            <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-light);">
+                Copy the markdown and paste it into your <code>content.md</code> file on GitHub.
+            </p>
         </div>
     </div>
 
@@ -386,10 +406,13 @@
         </div>
 
         <div class="footer">
-            <p>Powered by MarkFlow • Edit directly on this page</p>
+            <p>Powered by MarkFlow • Edit content directly</p>
             <p style="margin-top: 0.5rem; font-size: 0.75rem;">
                 <span id="syncStatus">Loading...</span>
             </p>
+            <button class="copy-btn" onclick="copyAllContent()">
+                📋 Copy All Content to Clipboard
+            </button>
         </div>
     </div>
 
@@ -514,7 +537,7 @@
                             </div>
                             <div class="section-actions">
                                 <button class="action-btn" onclick="editSection(${index})" title="Edit">
-                                    ✏️
+                                    ✏️ Edit
                                 </button>
                             </div>
                         </div>
@@ -576,93 +599,45 @@ Start writing here...`;
         async function saveContent() {
             const newRaw = document.getElementById('editorTextarea').value;
             
-            if (appState.editingIndex === null) {
-                // New section
-                const newSection = parseSection(newRaw, appState.sections.length);
-                appState.sections.push(newSection);
-            } else {
-                // Update existing section
-                const updatedSection = parseSection(newRaw, appState.editingIndex);
-                appState.sections[appState.editingIndex] = updatedSection;
-            }
-            
-            // Generate new content
-            const newContent = generateFullContent();
-            
-            // Show saving message
-            updateStatus('Saving...');
-            
-            // Save to GitHub using GitHub's API
+            // Copy to clipboard
             try {
-                await saveToGitHub(newContent);
-                appState.originalContent = newContent;
-                renderContent();
-                updateStatus(true);
-                showMessage('Changes saved successfully!');
+                await navigator.clipboard.writeText(newRaw);
+                alert('✅ Content copied to clipboard!\n\nNow go to GitHub and paste it into your content.md file.');
+                
+                // Open GitHub edit page
+                window.open(
+                    `https://github.com/${CONFIG.github.user}/${CONFIG.github.repo}/edit/main/${CONFIG.github.file}`,
+                    '_blank'
+                );
+                
                 closeEditor();
             } catch (error) {
-                console.error('Save failed:', error);
-                updateStatus(false);
-                showMessage('Failed to save. Please try again.');
+                console.error('Copy failed:', error);
+                alert('Failed to copy. Please copy manually:\n\n' + newRaw);
+            }
+        }
+
+        async function copyAllContent() {
+            const fullContent = generateFullContent();
+            
+            try {
+                await navigator.clipboard.writeText(fullContent);
+                alert('✅ All content copied to clipboard!\n\nYou can now update your content.md file on GitHub.');
+            } catch (error) {
+                console.error('Copy failed:', error);
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = fullContent;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('Content copied to clipboard!');
             }
         }
 
         function generateFullContent() {
             return appState.sections.map(section => section.raw).join('\n\n---\n\n');
-        }
-
-        // ========== GITHUB INTEGRATION ==========
-        async function saveToGitHub(content) {
-            // This is where the magic happens
-            // We use GitHub's API to update the file
-            
-            try {
-                // First, get the current file SHA
-                const apiUrl = `https://api.github.com/repos/${CONFIG.github.user}/${CONFIG.github.repo}/contents/${CONFIG.github.file}`;
-                const getResponse = await fetch(apiUrl);
-                
-                if (!getResponse.ok) {
-                    throw new Error('Cannot access GitHub file');
-                }
-                
-                const fileData = await getResponse.json();
-                const sha = fileData.sha;
-                
-                // Encode content to base64
-                const encodedContent = btoa(unescape(encodeURIComponent(content)));
-                
-                // Update the file
-                const updateResponse = await fetch(apiUrl, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/vnd.github.v3+json'
-                    },
-                    body: JSON.stringify({
-                        message: `Update via MarkFlow ${new Date().toISOString()}`,
-                        content: encodedContent,
-                        sha: sha
-                    })
-                });
-                
-                if (!updateResponse.ok) {
-                    throw new Error('GitHub update failed');
-                }
-                
-                return true;
-            } catch (error) {
-                console.error('GitHub save error:', error);
-                
-                // Fallback: Open GitHub editor
-                setTimeout(() => {
-                    window.open(
-                        `https://github.com/${CONFIG.github.user}/${CONFIG.github.repo}/edit/main/${CONFIG.github.file}`,
-                        '_blank'
-                    );
-                }, 1000);
-                
-                throw error;
-            }
         }
 
         // ========== UTILITY FUNCTIONS ==========
@@ -685,16 +660,12 @@ Start writing here...`;
         function updateStatus(status) {
             const element = document.getElementById('syncStatus');
             if (status === true) {
-                element.innerHTML = '<span style="color:#10b981;">●</span> Synced with GitHub';
+                element.innerHTML = '<span style="color:#10b981;">●</span> Connected to GitHub';
             } else if (status === false) {
-                element.innerHTML = '<span style="color:#f59e0b;">●</span> Offline mode';
+                element.innerHTML = '<span style="color:#f59e0b;">●</span> Using demo content';
             } else {
                 element.innerHTML = `<span style="color:#3b82f6;">●</span> ${status}`;
             }
-        }
-
-        function showMessage(message) {
-            alert(message); // Simple alert for now
         }
 
         function loadDemoContent() {
@@ -702,7 +673,7 @@ Start writing here...`;
                 {
                     id: 0,
                     title: 'Welcome to MarkFlow',
-                    content: 'This is your live editing platform. Click the edit button (✏️) above to edit this text directly on the page!\n\n## Features\n- **Edit directly** - No GitHub redirect\n- **Auto-save** - Changes sync automatically\n- **Live preview** - See changes instantly\n- **Simple interface** - Focus on writing',
+                    content: 'This is your live editing platform. Click the edit button (✏️) above to edit this text directly on the page!\n\n## How to Edit:\n1. Click "Edit" button\n2. Make changes in the editor\n3. Click "Copy to Clipboard"\n4. Paste into GitHub\n5. Refresh page to see changes\n\n## Features:\n- **Edit directly** in browser\n- **Copy to clipboard** with one click\n- **Auto-formatting** for markdown\n- **Live preview** of changes',
                     date: new Date().toISOString().split('T')[0],
                     tags: ['welcome'],
                     raw: `---
@@ -715,11 +686,18 @@ tags: welcome
 
 This is your live editing platform. Click the edit button (✏️) above to edit this text directly on the page!
 
-## Features
-- **Edit directly** - No GitHub redirect
-- **Auto-save** - Changes sync automatically
-- **Live preview** - See changes instantly
-- **Simple interface** - Focus on writing`
+## How to Edit:
+1. Click "Edit" button
+2. Make changes in the editor
+3. Click "Copy to Clipboard"
+4. Paste into GitHub
+5. Refresh page to see changes
+
+## Features:
+- **Edit directly** in browser
+- **Copy to clipboard** with one click
+- **Auto-formatting** for markdown
+- **Live preview** of changes`
                 }
             ];
             appState.originalContent = appState.sections[0].raw;
