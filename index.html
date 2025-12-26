@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neocortex | Live Editing Platform</title>
+    <title>MarkFlow | Live Editing Platform</title>
     <style>
         :root {
             --bg: #ffffff;
@@ -41,7 +41,6 @@
             color: var(--text);
             line-height: 1.6;
             transition: all 0.3s ease;
-            overflow-x: hidden;
         }
 
         .container {
@@ -74,9 +73,6 @@
             font-weight: bold;
             color: var(--primary);
             text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
         }
 
         .controls {
@@ -94,9 +90,6 @@
             cursor: pointer;
             font-size: 0.875rem;
             transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
         }
 
         .btn:hover {
@@ -114,48 +107,7 @@
             background: #2563eb;
         }
 
-        .btn-success {
-            background: var(--success);
-            color: white;
-            border: none;
-        }
-
-        .btn-success:hover {
-            background: #059669;
-        }
-
-        /* Navigation */
-        .nav {
-            margin: 2rem 0;
-            overflow-x: auto;
-            white-space: nowrap;
-            padding-bottom: 0.5rem;
-        }
-
-        .nav-items {
-            display: inline-flex;
-            gap: 0.5rem;
-        }
-
-        .nav-item {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            padding: 0.5rem 1rem;
-            border-radius: var(--radius);
-            text-decoration: none;
-            color: var(--text-light);
-            font-size: 0.875rem;
-            transition: all 0.2s;
-        }
-
-        .nav-item:hover,
-        .nav-item.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        /* Content */
+        /* Content Sections */
         .content-section {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -163,7 +115,6 @@
             padding: 2rem;
             margin-bottom: 2rem;
             transition: all 0.3s ease;
-            position: relative;
         }
 
         .content-section:hover {
@@ -171,75 +122,29 @@
             box-shadow: var(--shadow);
         }
 
-        .content-section.editing {
-            border: 2px solid var(--primary);
-            background: rgba(59, 130, 246, 0.05);
-            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.2);
-        }
-
         .section-header {
             display: flex;
             justify-content: space-between;
             align-items: start;
             margin-bottom: 1rem;
-            gap: 1rem;
         }
 
         .section-title {
             font-size: 1.5rem;
             color: var(--text);
-            font-weight: 600;
-            flex: 1;
-        }
-
-        .section-actions {
-            display: flex;
-            gap: 0.5rem;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-
-        .content-section:hover .section-actions {
-            opacity: 1;
-        }
-
-        .action-btn {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-light);
-            padding: 0.5rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.875rem;
-            transition: all 0.2s;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .action-btn:hover {
-            background: var(--surface);
-            color: var(--primary);
-            border-color: var(--primary);
-            transform: scale(1.1);
         }
 
         .section-date {
             color: var(--text-light);
             font-size: 0.875rem;
-            margin-top: 0.25rem;
         }
 
         .section-content {
             color: var(--text);
             line-height: 1.8;
-            position: relative;
         }
 
-        .section-content h2,
-        .section-content h3 {
+        .section-content h2 {
             margin: 1.5rem 0 1rem;
         }
 
@@ -251,12 +156,8 @@
             background: rgba(0, 0, 0, 0.1);
             padding: 0.2rem 0.4rem;
             border-radius: 4px;
-            font-family: 'SF Mono', monospace;
+            font-family: monospace;
             font-size: 0.9em;
-        }
-
-        .dark-mode .section-content code {
-            background: rgba(255, 255, 255, 0.1);
         }
 
         .section-content pre {
@@ -265,146 +166,6 @@
             border-radius: 8px;
             overflow-x: auto;
             margin: 1rem 0;
-            position: relative;
-        }
-
-        .dark-mode .section-content pre {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .copy-code {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            cursor: pointer;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-
-        pre:hover .copy-code {
-            opacity: 1;
-        }
-
-        .section-content img {
-            max-width: 100%;
-            border-radius: var(--radius);
-            margin: 1rem 0;
-        }
-
-        .section-tags {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1.5rem;
-            flex-wrap: wrap;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border);
-        }
-
-        .tag {
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--primary);
-            padding: 0.25rem 0.75rem;
-            border-radius: 100px;
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .tag:hover {
-            background: rgba(59, 130, 246, 0.2);
-            transform: translateY(-1px);
-        }
-
-        /* Inline Editor */
-        .inline-editor {
-            position: relative;
-            margin: 0.5rem 0;
-        }
-
-        .editor-toolbar {
-            display: flex;
-            gap: 0.25rem;
-            margin-bottom: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .editor-btn {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            color: var(--text-light);
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.75rem;
-            transition: all 0.2s;
-        }
-
-        .editor-btn:hover {
-            background: var(--surface);
-            color: var(--primary);
-            border-color: var(--primary);
-        }
-
-        .editor-textarea {
-            width: 100%;
-            min-height: 300px;
-            font-family: 'SF Mono', 'Monaco', monospace;
-            font-size: 14px;
-            line-height: 1.6;
-            background: var(--bg);
-            color: var(--text);
-            border: 2px solid var(--border);
-            border-radius: var(--radius);
-            padding: 1rem;
-            resize: vertical;
-            transition: all 0.3s;
-        }
-
-        .editor-textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .editor-preview {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            margin-top: 1rem;
-            min-height: 100px;
-        }
-
-        /* FAB */
-        .fab {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: white;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
-            transition: all 0.3s ease;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .fab:hover {
-            transform: scale(1.1);
-            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.6);
         }
 
         /* Footer */
@@ -439,109 +200,8 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Notifications */
-        .notification {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            background: var(--surface);
-            color: var(--text);
-            padding: 1rem 1.5rem;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            z-index: 1001;
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-            max-width: 400px;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        .notification.success {
-            border-left: 4px solid var(--success);
-        }
-
-        .notification.error {
-            border-left: 4px solid var(--danger);
-        }
-
-        .notification.info {
-            border-left: 4px solid var(--primary);
-        }
-
-        .notification-icon {
-            font-size: 1.25rem;
-        }
-
-        /* Stats */
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .stat {
-            text-align: center;
-            padding: 1rem;
-            background: var(--surface);
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--primary);
-            margin-bottom: 0.25rem;
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-            color: var(--text-light);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* Search */
-        .search-container {
-            position: relative;
-            margin: 1rem 0;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 0.75rem 1rem 0.75rem 3rem;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            background: var(--surface);
-            color: var(--text);
-            font-size: 1rem;
-            transition: all 0.2s;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-light);
-        }
-
         /* Responsive */
-        @media (max-width: 768px) {
+        @media (max-width: 640px) {
             .container {
                 padding: 1rem;
             }
@@ -554,323 +214,118 @@
                 flex-direction: column;
                 gap: 0.5rem;
             }
-            
-            .section-actions {
-                opacity: 1;
-            }
-            
-            .stats {
-                grid-template-columns: 1fr;
-            }
-            
-            .notification {
-                left: 1rem;
-                right: 1rem;
-                max-width: none;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .header-content {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .controls {
-                justify-content: center;
-            }
-            
-            .fab {
-                bottom: 1rem;
-                right: 1rem;
-            }
-        }
-
-        /* Animation for new content */
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .new-content {
-            animation: slideIn 0.3s ease;
         }
     </style>
 </head>
 <body>
-    <!-- Notification System -->
-    <div class="notification" id="notification">
-        <span class="notification-icon" id="notificationIcon">ℹ️</span>
-        <span id="notificationMessage">Message</span>
-    </div>
-
-    <!-- Header -->
     <div class="header">
         <div class="container">
             <div class="header-content">
-                <a href="#" class="logo" onclick="scrollToTop()">
-                    <span>🧠</span>
-                    <span>Neocortex</span>
-                </a>
+                <a href="#" class="logo" onclick="scrollToTop()">📝 MarkFlow</a>
                 <div class="controls">
-                    <button class="btn" onclick="toggleTheme()" id="themeBtn" title="Toggle theme">
-                        <span>🌙</span>
-                        <span>Theme</span>
-                    </button>
-                    <button class="btn btn-primary" onclick="createNewSection()" title="Create new thought">
-                        <span>+</span>
-                        <span>New Thought</span>
-                    </button>
+                    <button class="btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+                    <button class="btn btn-primary" onclick="editContent()">✏️ Edit</button>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="container">
-        <!-- Search -->
-        <div class="search-container">
-            <span class="search-icon">🔍</span>
-            <input type="text" 
-                   id="searchInput" 
-                   class="search-input" 
-                   placeholder="Search thoughts...">
-        </div>
-
-        <!-- Navigation -->
-        <nav class="nav" id="navContainer"></nav>
-
-        <!-- Content Sections -->
+        <!-- Content will load here -->
         <div id="contentContainer">
             <div class="loading">
                 <div class="spinner"></div>
-                <p>Loading your digital mind...</p>
-            </div>
-        </div>
-
-        <!-- Stats -->
-        <div class="content-section">
-            <h3>📊 Platform Stats</h3>
-            <div class="stats">
-                <div class="stat">
-                    <div class="stat-value" id="sectionCount">0</div>
-                    <div class="stat-label">Thoughts</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value" id="wordCount">0</div>
-                    <div class="stat-label">Words</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value" id="lastUpdated">Now</div>
-                    <div class="stat-label">Last Updated</div>
-                </div>
-            </div>
-            <div style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-light);">
-                <span id="syncStatus" style="display: inline-flex; align-items: center; gap: 0.25rem;">
-                    <span style="display: inline-block; width: 8px; height: 8px; background: var(--success); border-radius: 50%;"></span>
-                    Connected to GitHub
-                </span>
-            </div>
-        </div>
-
-        <!-- Instructions -->
-        <div class="content-section" style="background: rgba(59, 130, 246, 0.05); border-color: rgba(59, 130, 246, 0.3);">
-            <h3>🎯 How This Works</h3>
-            <p><strong>Revolutionary Feature:</strong> Edit directly on this page! Your changes automatically save to GitHub behind the scenes.</p>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
-                <div>
-                    <h4>✏️ Edit Anywhere</h4>
-                    <p>Click the edit button on any thought to modify it directly here.</p>
-                </div>
-                <div>
-                    <h4>💾 Auto-Save</h4>
-                    <p>Changes automatically sync with GitHub in the background.</p>
-                </div>
-                <div>
-                    <h4>🔄 Live Updates</h4>
-                    <p>See changes from other devices instantly.</p>
-                </div>
+                <p>Loading content...</p>
             </div>
         </div>
 
         <div class="footer">
-            <p>Powered by <strong>Neocortex</strong> • Edit directly on this page • Changes sync automatically</p>
+            <p>Powered by MarkFlow • Edit <code>content.md</code> to update</p>
             <p style="margin-top: 0.5rem; font-size: 0.75rem;">
-                <a href="https://github.com/Baraka124/neocortex-platform" 
-                   target="_blank"
-                   style="color: var(--primary); text-decoration: none;">
-                    View source on GitHub
-                </a>
+                Changes sync automatically
             </p>
         </div>
     </div>
 
-    <!-- Floating Action Button -->
-    <button class="fab" onclick="scrollToTop()" title="Back to top">
-        ↑
-    </button>
-
     <script>
-        // ========== CONFIGURATION ==========
+        // ========== CONFIG ==========
         const CONFIG = {
             github: {
                 user: 'Baraka124',
                 repo: 'neocortex-platform',
-                file: 'neocortex.md',
-                branch: 'main'
-            },
-            features: {
-                autoSave: true,
-                livePreview: true,
-                search: true,
-                darkMode: true
-            },
-            cache: {
-                enabled: true,
-                duration: 5 * 60 * 1000 // 5 minutes
+                file: 'content.md'
             }
         };
 
-        // ========== STATE MANAGEMENT ==========
-        class NeocortexState {
+        // ========== MAIN APP ==========
+        class MarkFlow {
             constructor() {
                 this.sections = [];
-                this.currentFilter = 'all';
-                this.editingSectionId = null;
-                this.originalContent = '';
-                this.fileSHA = '';
-                this.isSaving = false;
-                this.autoSaveTimer = null;
-            }
-        }
-
-        // ========== GITHUB INTEGRATION ==========
-        class GitHubIntegration {
-            constructor() {
-                this.baseURL = 'https://api.github.com';
-                this.rawURL = 'https://raw.githubusercontent.com';
+                this.init();
             }
 
-            async getFileContent() {
+            async init() {
+                this.loadTheme();
+                await this.loadContent();
+                this.render();
+                console.log('MarkFlow Platform Ready');
+            }
+
+            async loadContent() {
                 try {
-                    // Try API first
-                    const url = `${this.baseURL}/repos/${CONFIG.github.user}/${CONFIG.github.repo}/contents/${CONFIG.github.file}`;
-                    const response = await fetch(url);
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        this.fileSHA = data.sha;
-                        const content = atob(data.content);
-                        return { success: true, content, sha: data.sha };
-                    } else {
-                        // Fallback to raw content
-                        return await this.getRawContent();
-                    }
-                } catch (error) {
-                    console.error('API failed, trying raw:', error);
-                    return await this.getRawContent();
-                }
-            }
-
-            async getRawContent() {
-                try {
-                    const url = `${this.rawURL}/${CONFIG.github.user}/${CONFIG.github.repo}/${CONFIG.github.branch}/${CONFIG.github.file}?t=${Date.now()}`;
+                    const url = `https://raw.githubusercontent.com/${CONFIG.github.user}/${CONFIG.github.repo}/main/${CONFIG.github.file}`;
                     const response = await fetch(url);
                     
                     if (response.ok) {
                         const content = await response.text();
-                        return { success: true, content, sha: 'unknown' };
+                        this.parseContent(content);
+                        this.updateStatus(true);
                     } else {
-                        throw new Error('Could not fetch content');
+                        this.loadDemoContent();
+                        this.updateStatus(false);
                     }
-                } catch (error) {
-                    return { success: false, error: error.message };
-                }
-            }
-
-            async saveContent(content, message = 'Update via Neocortex') {
-                try {
-                    const url = `${this.baseURL}/repos/${CONFIG.github.user}/${CONFIG.github.repo}/contents/${CONFIG.github.file}`;
                     
-                    const response = await fetch(url, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/vnd.github.v3+json'
-                        },
-                        body: JSON.stringify({
-                            message: `${message} at ${new Date().toISOString()}`,
-                            content: btoa(unescape(encodeURIComponent(content))),
-                            sha: this.fileSHA,
-                            branch: CONFIG.github.branch
-                        })
-                    });
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        this.fileSHA = data.content.sha;
-                        return { success: true, sha: data.content.sha };
-                    } else {
-                        const error = await response.json();
-                        throw new Error(error.message || 'GitHub API error');
-                    }
                 } catch (error) {
-                    console.error('Save failed:', error);
-                    return { success: false, error: error.message };
+                    console.log('Error loading:', error);
+                    this.loadDemoContent();
+                    this.updateStatus(false);
                 }
             }
-        }
 
-        // ========== CONTENT PARSING ==========
-        class ContentParser {
-            parseContent(text) {
-                const sections = [];
-                const rawSections = text.split(/\n---\n/);
+            parseContent(content) {
+                const rawSections = content.split(/\n---\n/);
+                this.sections = [];
                 
-                rawSections.forEach((sectionText, index) => {
-                    if (sectionText.trim()) {
-                        const section = this.parseSection(sectionText, index);
-                        if (section) {
-                            sections.push(section);
+                rawSections.forEach((section, index) => {
+                    if (section.trim()) {
+                        const parsed = this.parseSection(section, index);
+                        if (parsed) {
+                            this.sections.push(parsed);
                         }
                     }
                 });
-                
-                return sections;
             }
 
             parseSection(text, id) {
                 const lines = text.trim().split('\n');
                 const section = {
-                    id,
-                    title: 'Untitled Thought',
+                    id: id,
+                    title: 'Untitled',
                     content: '',
                     date: new Date().toISOString().split('T')[0],
-                    tags: [],
-                    raw: text,
-                    frontmatter: ''
+                    tags: []
                 };
                 
                 let inFrontmatter = false;
                 let contentLines = [];
-                let frontmatterLines = [];
                 
                 for (const line of lines) {
-                    const trimmed = line.trim();
-                    
-                    if (trimmed === '---') {
+                    if (line.trim() === '---') {
                         inFrontmatter = !inFrontmatter;
                         continue;
                     }
                     
                     if (inFrontmatter) {
-                        frontmatterLines.push(line);
                         const match = line.match(/^([^:]+):\s*(.+)$/);
                         if (match) {
                             const [, key, value] = match;
@@ -886,591 +341,52 @@
                     }
                 }
                 
-                section.content = contentLines.join('\n').trim();
-                section.frontmatter = frontmatterLines.join('\n');
-                
-                // If no frontmatter, extract title from first line
-                if (!inFrontmatter && lines.length > 0 && lines[0].startsWith('# ')) {
-                    section.title = lines[0].substring(2).trim();
-                }
-                
+                section.content = contentLines.join('\n');
                 return section;
             }
 
-            generateSection(section) {
-                const frontmatter = section.frontmatter || `title: ${section.title}\ndate: ${section.date}\ntags: ${section.tags.join(', ')}`;
-                return `---\n${frontmatter}\n---\n\n${section.content}`;
-            }
-
-            generateFullContent(sections) {
-                return sections.map(section => this.generateSection(section)).join('\n\n---\n\n');
-            }
-        }
-
-        // ========== MARKDOWN RENDERER ==========
-        class MarkdownRenderer {
-            constructor() {
-                this.renderers = {
-                    heading: (level, text) => `<h${level}>${text}</h${level}>`,
-                    bold: (text) => `<strong>${text}</strong>`,
-                    italic: (text) => `<em>${text}</em>`,
-                    code: (text) => `<code>${text}</code>`,
-                    link: (text, url) => `<a href="${url}" target="_blank" rel="noopener">${text}</a>`,
-                    image: (alt, url) => `<img src="${url}" alt="${alt}" style="max-width:100%;border-radius:8px;margin:1rem 0;">`,
-                    list: (items, ordered = false) => {
-                        const tag = ordered ? 'ol' : 'ul';
-                        return `<${tag}>${items.map(item => `<li>${item}</li>`).join('')}</${tag}>`;
-                    },
-                    blockquote: (text) => `<blockquote>${text}</blockquote>`,
-                    paragraph: (text) => `<p>${text}</p>`
-                };
-            }
-
-            render(text) {
-                if (!text) return '';
-                
-                // Process code blocks first
-                text = this.renderCodeBlocks(text);
-                
-                // Process other markdown
-                const lines = text.split('\n');
-                let html = '';
-                let inList = false;
-                let listItems = [];
-                let listOrdered = false;
-                
-                for (let i = 0; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    
-                    // Headings
-                    if (line.startsWith('### ')) {
-                        html += this.renderers.heading(3, line.substring(4));
-                    } else if (line.startsWith('## ')) {
-                        html += this.renderers.heading(2, line.substring(3));
-                    } else if (line.startsWith('# ')) {
-                        html += this.renderers.heading(1, line.substring(2));
-                    }
-                    // Lists
-                    else if (line.startsWith('- ') || line.match(/^\d+\.\s/)) {
-                        if (!inList) {
-                            inList = true;
-                            listOrdered = line.match(/^\d+\.\s/) !== null;
-                        }
-                        listItems.push(line.replace(/^[-\d\.]\s*/, ''));
-                    }
-                    // Blockquotes
-                    else if (line.startsWith('> ')) {
-                        html += this.renderers.blockquote(line.substring(2));
-                    }
-                    // Paragraphs
-                    else if (line) {
-                        if (inList) {
-                            html += this.renderers.list(listItems, listOrdered);
-                            inList = false;
-                            listItems = [];
-                        }
-                        html += this.renderers.paragraph(this.renderInline(line));
-                    }
-                    // Empty line
-                    else {
-                        if (inList) {
-                            html += this.renderers.list(listItems, listOrdered);
-                            inList = false;
-                            listItems = [];
-                        }
-                        html += '<br>';
-                    }
-                }
-                
-                // Handle trailing list
-                if (inList) {
-                    html += this.renderers.list(listItems, listOrdered);
-                }
-                
-                return html;
-            }
-
-            renderInline(text) {
-                return text
-                    .replace(/\*\*(.*?)\*\*/g, (_, content) => this.renderers.bold(content))
-                    .replace(/\*(.*?)\*/g, (_, content) => this.renderers.italic(content))
-                    .replace(/`([^`]+)`/g, (_, content) => this.renderers.code(content))
-                    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, url) => this.renderers.image(alt, url))
-                    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, text, url) => this.renderers.link(text, url));
-            }
-
-            renderCodeBlocks(text) {
-                const codeBlockRegex = /```(\w*)\n([\s\S]*?)\n```/g;
-                return text.replace(codeBlockRegex, (_, language, code) => {
-                    const escaped = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                    return `<pre><button class="copy-code" onclick="copyToClipboard(this)">📋 Copy</button><code class="language-${language}">${escaped}</code></pre>`;
-                });
-            }
-        }
-
-        // ========== UI MANAGER ==========
-        class UIManager {
-            constructor() {
-                this.renderer = new MarkdownRenderer();
-                this.github = new GitHubIntegration();
-                this.parser = new ContentParser();
-                this.state = new NeocortexState();
-            }
-
-            async init() {
-                this.setupTheme();
-                this.setupEventListeners();
-                await this.loadContent();
-                this.setupAutoRefresh();
-            }
-
-            setupTheme() {
-                const saved = localStorage.getItem('neocortex-theme');
-                if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                    document.body.classList.add('dark-mode');
-                    document.getElementById('themeBtn').innerHTML = '<span>☀️</span><span>Light</span>';
-                }
-            }
-
-            setupEventListeners() {
-                // Search
-                const searchInput = document.getElementById('searchInput');
-                searchInput.addEventListener('input', (e) => this.searchContent(e.target.value));
-                
-                // Theme toggle
-                document.getElementById('themeBtn').addEventListener('click', () => this.toggleTheme());
-                
-                // FAB scroll
-                document.querySelector('.fab').addEventListener('click', () => {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                });
-            }
-
-            async loadContent() {
-                this.showNotification('Loading content from GitHub...', 'info');
-                
-                const result = await this.github.getFileContent();
-                
-                if (result.success) {
-                    this.state.originalContent = result.content;
-                    this.state.sections = this.parser.parseContent(result.content);
-                    this.state.fileSHA = result.sha;
-                    this.render();
-                    this.showNotification('Content loaded successfully!', 'success');
-                } else {
-                    this.loadFallbackContent();
-                    this.showNotification('Using demo content. Connect to GitHub to edit.', 'error');
-                }
-            }
-
-            loadFallbackContent() {
-                const demoContent = `---
-title: Welcome to Neocortex
-date: ${new Date().toISOString().split('T')[0]}
-tags: welcome, demo
----
-
-# Welcome to Your Digital Mind 🧠
-
-This is a revolutionary platform where you can edit content directly on the page, and it automatically syncs with GitHub.
-
-## Try It Out!
-
-1. **Edit this text** by clicking the edit button (✏️) above
-2. **Make changes** in the editor that appears
-3. **Save** and watch it update in real-time
-4. **Check GitHub** to see your changes saved automatically
-
-## Features
-
-✅ **In-place editing** - No more going to GitHub  
-✅ **Auto-save** - Changes sync automatically  
-✅ **Live preview** - See changes as you type  
-✅ **Search** - Find anything instantly  
-✅ **Tags** - Organize your thoughts  
-✅ **Dark/light mode** - Choose your preference  
-
----
-title: How This Works
-date: ${new Date().toISOString().split('T')[0]}
-tags: tutorial, technology
----
-
-# The Magic Behind the Scenes
-
-## Architecture
-
-\`\`\`javascript
-// When you edit on the website:
-1. Changes captured in browser
-2. Converted to markdown format
-3. Sent to GitHub API
-4. Saved to neocortex.md
-5. Page refreshes automatically
-
-// The entire system runs on:
-- GitHub Pages (hosting)
-- GitHub API (storage)
-- Vanilla JavaScript (logic)
-- Markdown (content format)
-\`\`\`
-
-## Why This Matters
-
-> "Simplicity is the ultimate sophistication." - Leonardo da Vinci
-
-This platform proves that powerful tools don't need to be complex. Everything you see is powered by just a few files, yet it provides a modern editing experience.
-
----
-title: Start Creating
-date: ${new Date().toISOString().split('T')[0]}
-tags: get-started, creative
----
-
-# Your First Thought
-
-Click the **"New Thought"** button in the header to start writing!
-
-## Tips for Great Content
-
-- **Write regularly** - Consistency beats perfection
-- **Use tags** - Organize for future you
-- **Include code** - Share your technical insights
-- **Add images** - Visuals enhance understanding
-- **Link resources** - Help others learn more
-
-## Example Structure
-
-\`\`\`markdown
----
-title: Your Thought Title
-date: YYYY-MM-DD
-tags: category1, category2
----
-
-# Main Heading
-
-Your content here...
-
-## Subheading
-
-- Bullet points
-- **Bold text**
-- \`Code snippets\`
-
-> Inspiring quotes
-\`\`\`
-
----
-
-**Start editing now!** Click any edit button or create a new thought.`;
-                
-                this.state.originalContent = demoContent;
-                this.state.sections = this.parser.parseContent(demoContent);
-                this.render();
-            }
-
             render() {
-                this.updateStats();
-                this.renderNavigation();
-                this.renderSections();
-            }
-
-            updateStats() {
-                const totalWords = this.state.sections.reduce((sum, section) => {
-                    return sum + (section.content?.split(/\s+/).length || 0);
-                }, 0);
-                
-                document.getElementById('sectionCount').textContent = this.state.sections.length;
-                document.getElementById('wordCount').textContent = totalWords.toLocaleString();
-                document.getElementById('lastUpdated').textContent = 'Just now';
-            }
-
-            renderNavigation() {
-                const container = document.getElementById('navContainer');
-                const allTags = this.state.sections.flatMap(s => s.tags || []);
-                const uniqueTags = [...new Set(allTags)].filter(Boolean);
-                
-                const items = [
-                    { id: 'all', label: 'All Thoughts', count: this.state.sections.length },
-                    ...uniqueTags.map(tag => ({
-                        id: tag,
-                        label: `#${tag}`,
-                        count: this.state.sections.filter(s => s.tags?.includes(tag)).length
-                    }))
-                ];
-                
-                container.innerHTML = `
-                    <div class="nav-items">
-                        ${items.map(item => `
-                            <a href="#${item.id}" 
-                               class="nav-item ${this.state.currentFilter === item.id ? 'active' : ''}"
-                               onclick="uiManager.filterSections('${item.id}')">
-                                ${item.label}
-                                <small style="opacity: 0.7; margin-left: 0.25rem;">(${item.count})</small>
-                            </a>
-                        `).join('')}
-                    </div>
-                `;
-            }
-
-            renderSections() {
                 const container = document.getElementById('contentContainer');
-                const filtered = this.state.currentFilter === 'all' 
-                    ? this.state.sections 
-                    : this.state.sections.filter(s => s.tags?.includes(this.state.currentFilter));
                 
-                if (filtered.length === 0) {
+                if (this.sections.length === 0) {
                     container.innerHTML = `
                         <div class="content-section">
-                            <h3>No thoughts found</h3>
-                            <p>Try a different filter or create a new thought!</p>
-                            <button class="btn btn-primary" onclick="createNewSection()" style="margin-top: 1rem;">
-                                + Create New Thought
+                            <h3>Welcome to MarkFlow</h3>
+                            <p>No content found. Create your <code>content.md</code> file to get started.</p>
+                            <button class="btn btn-primary" onclick="editContent()" style="margin-top: 1rem;">
+                                Create Content File
                             </button>
                         </div>
                     `;
                     return;
                 }
                 
-                container.innerHTML = filtered.map((section, index) => {
-                    const isEditing = this.state.editingSectionId === section.id;
-                    const wordCount = section.content?.split(/\s+/).length || 0;
-                    
-                    return `
-                        <article class="content-section ${isEditing ? 'editing' : ''} ${index < 3 ? 'new-content' : ''}" 
-                                 id="section-${section.id}">
-                            <div class="section-header">
-                                <div style="flex: 1;">
-                                    <div class="section-title">${section.title}</div>
-                                    <div class="section-date">
-                                        ${this.formatDate(section.date)} • ${wordCount} words
-                                    </div>
-                                </div>
-                                <div class="section-actions">
-                                    <button class="action-btn" onclick="uiManager.startEditing(${section.id})" title="Edit">
-                                        ✏️
-                                    </button>
-                                    <button class="action-btn" onclick="uiManager.deleteSection(${section.id})" title="Delete">
-                                        🗑️
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            ${isEditing ? this.renderEditor(section) : this.renderContent(section)}
-                            
-                            ${section.tags?.length ? `
-                                <div class="section-tags">
-                                    ${section.tags.map(tag => `
-                                        <span class="tag" onclick="uiManager.filterSections('${tag}')">#${tag}</span>
-                                    `).join('')}
-                                </div>
-                            ` : ''}
-                        </article>
-                    `;
-                }).join('');
-            }
-
-            renderContent(section) {
-                return `
-                    <div class="section-content">
-                        ${this.renderer.render(section.content)}
-                    </div>
-                `;
-            }
-
-            renderEditor(section) {
-                return `
-                    <div class="inline-editor">
-                        <div class="editor-toolbar">
-                            <button class="editor-btn" onclick="formatText('**', '**')">Bold</button>
-                            <button class="editor-btn" onclick="formatText('*', '*')">Italic</button>
-                            <button class="editor-btn" onclick="formatText('# ', '')">H1</button>
-                            <button class="editor-btn" onclick="formatText('## ', '')">H2</button>
-                            <button class="editor-btn" onclick="formatText('```\\n', '\\n```')">Code</button>
-                            <button class="editor-btn" onclick="formatText('- ', '')">List</button>
+                container.innerHTML = this.sections.map(section => `
+                    <article class="content-section">
+                        <div class="section-header">
+                            <h2 class="section-title">${section.title}</h2>
+                            <span class="section-date">${this.formatDate(section.date)}</span>
                         </div>
-                        <textarea class="editor-textarea" id="editor-${section.id}">${section.raw}</textarea>
-                        ${CONFIG.features.livePreview ? `
-                            <div class="editor-preview">
-                                <h4>Live Preview</h4>
-                                ${this.renderer.render(section.content)}
-                            </div>
-                        ` : ''}
-                        <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
-                            <button class="btn" onclick="uiManager.cancelEditing()">Cancel</button>
-                            <button class="btn btn-success" onclick="uiManager.saveSection(${section.id})">
-                                💾 Save Changes
-                            </button>
+                        
+                        <div class="section-content">
+                            ${this.renderMarkdown(section.content)}
                         </div>
-                    </div>
-                `;
+                    </article>
+                `).join('');
             }
 
-            // ========== EDITING FUNCTIONS ==========
-            startEditing(sectionId) {
-                this.state.editingSectionId = sectionId;
-                this.renderSections();
-                
-                // Focus the editor
-                setTimeout(() => {
-                    const editor = document.getElementById(`editor-${sectionId}`);
-                    if (editor) {
-                        editor.focus();
-                        editor.addEventListener('input', () => {
-                            this.scheduleAutoSave(sectionId);
-                        });
-                    }
-                }, 100);
-            }
-
-            cancelEditing() {
-                this.state.editingSectionId = null;
-                this.renderSections();
-            }
-
-            scheduleAutoSave(sectionId) {
-                if (!CONFIG.features.autoSave) return;
-                
-                clearTimeout(this.state.autoSaveTimer);
-                this.state.autoSaveTimer = setTimeout(() => {
-                    this.saveSection(sectionId, true);
-                }, 3000);
-            }
-
-            async saveSection(sectionId, autoSave = false) {
-                const editor = document.getElementById(`editor-${sectionId}`);
-                if (!editor) return;
-                
-                const newRaw = editor.value;
-                const section = this.state.sections.find(s => s.id === sectionId);
-                
-                if (!section || newRaw === section.raw) {
-                    if (!autoSave) {
-                        this.showNotification('No changes to save', 'info');
-                    }
-                    return;
-                }
-                
-                this.state.isSaving = true;
-                
-                // Update local section
-                const updatedSection = this.parser.parseSection(newRaw, sectionId);
-                this.state.sections[sectionId] = updatedSection;
-                
-                // Generate new content
-                const newContent = this.parser.generateFullContent(this.state.sections);
-                
-                // Save to GitHub
-                const message = autoSave ? 'Auto-save via Neocortex' : `Update: ${section.title}`;
-                const result = await this.github.saveContent(newContent, message);
-                
-                if (result.success) {
-                    this.state.originalContent = newContent;
-                    this.state.fileSHA = result.sha;
-                    this.state.editingSectionId = null;
-                    
-                    if (!autoSave) {
-                        this.showNotification('Saved successfully!', 'success');
-                    }
-                    
-                    // Re-render
-                    this.render();
-                    
-                    // Update other tabs/windows
-                    this.broadcastUpdate();
-                } else {
-                    this.showNotification(`Save failed: ${result.error}`, 'error');
-                    // Revert changes
-                    this.state.sections[sectionId] = section;
-                }
-                
-                this.state.isSaving = false;
-            }
-
-            async deleteSection(sectionId) {
-                if (!confirm('Delete this thought? This action cannot be undone.')) {
-                    return;
-                }
-                
-                // Remove section locally
-                this.state.sections.splice(sectionId, 1);
-                
-                // Re-index sections
-                this.state.sections = this.state.sections.map((section, index) => ({
-                    ...section,
-                    id: index
-                }));
-                
-                // Generate new content
-                const newContent = this.parser.generateFullContent(this.state.sections);
-                
-                // Save to GitHub
-                const result = await this.github.saveContent(newContent, 'Delete thought');
-                
-                if (result.success) {
-                    this.state.originalContent = newContent;
-                    this.state.fileSHA = result.sha;
-                    this.showNotification('Thought deleted', 'success');
-                    this.render();
-                    this.broadcastUpdate();
-                } else {
-                    // Reload original content on failure
-                    await this.loadContent();
-                    this.showNotification('Delete failed', 'error');
-                }
-            }
-
-            // ========== UTILITIES ==========
-            filterSections(filter) {
-                this.state.currentFilter = filter;
-                window.location.hash = filter;
-                this.renderSections();
-            }
-
-            searchContent(query) {
-                if (!query.trim()) {
-                    this.renderSections();
-                    return;
-                }
-                
-                const container = document.getElementById('contentContainer');
-                const results = this.state.sections.filter(section => 
-                    section.title.toLowerCase().includes(query.toLowerCase()) ||
-                    section.content.toLowerCase().includes(query.toLowerCase()) ||
-                    section.tags?.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
-                );
-                
-                if (results.length === 0) {
-                    container.innerHTML = `
-                        <div class="content-section">
-                            <h3>No results found</h3>
-                            <p>Try different search terms or <span onclick="uiManager.filterSections('all')" style="color:var(--primary);cursor:pointer;">view all thoughts</span></p>
-                        </div>
-                    `;
-                } else {
-                    container.innerHTML = results.map(section => `
-                        <article class="content-section">
-                            <div class="section-header">
-                                <div class="section-title">${section.title}</div>
-                                <div class="section-date">${this.formatDate(section.date)}</div>
-                            </div>
-                            <div class="section-content">
-                                ${this.highlightSearch(this.renderer.render(section.content), query)}
-                            </div>
-                        </article>
-                    `).join('');
-                }
-            }
-
-            highlightSearch(text, query) {
-                if (!query) return text;
-                const regex = new RegExp(`(${this.escapeRegex(query)})`, 'gi');
-                return text.replace(regex, '<mark style="background:rgba(59,130,246,0.3);padding:2px 0;border-radius:2px;">$1</mark>');
-            }
-
-            escapeRegex(string) {
-                return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            renderMarkdown(text) {
+                return text
+                    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+                    .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+                    .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/`([^`]+)`/g, '<code>$1</code>')
+                    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img alt="$1" src="$2" style="max-width:100%;">')
+                    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+                    .replace(/\n\n/g, '</p><p>')
+                    .replace(/\n/g, '<br>');
             }
 
             formatDate(dateStr) {
@@ -1483,194 +399,71 @@ Your content here...
                     if (days === 0) return 'Today';
                     if (days === 1) return 'Yesterday';
                     if (days < 7) return `${days} days ago`;
-                    if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
                     return date.toLocaleDateString();
                 } catch {
                     return 'Recent';
                 }
             }
 
+            loadTheme() {
+                if (localStorage.getItem('theme') === 'dark') {
+                    document.body.classList.add('dark-mode');
+                    document.getElementById('themeBtn').textContent = '☀️';
+                }
+            }
+
             toggleTheme() {
-                const isDark = document.body.classList.toggle('dark-mode');
-                localStorage.setItem('neocortex-theme', isDark ? 'dark' : 'light');
-                
-                const themeBtn = document.getElementById('themeBtn');
-                if (isDark) {
-                    themeBtn.innerHTML = '<span>☀️</span><span>Light</span>';
-                } else {
-                    themeBtn.innerHTML = '<span>🌙</span><span>Dark</span>';
+                document.body.classList.toggle('dark-mode');
+                const isDark = document.body.classList.contains('dark-mode');
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌙';
+            }
+
+            updateStatus(success) {
+                // Update footer status
+                const footer = document.querySelector('.footer p:last-child');
+                if (footer) {
+                    footer.innerHTML = success 
+                        ? '<span style="color:#10b981;">●</span> Connected to GitHub'
+                        : '<span style="color:#f59e0b;">●</span> Using demo content';
                 }
             }
 
-            showNotification(message, type = 'info') {
-                const notification = document.getElementById('notification');
-                const icon = document.getElementById('notificationIcon');
-                
-                // Set icon based on type
-                const icons = {
-                    success: '✅',
-                    error: '❌',
-                    info: 'ℹ️',
-                    warning: '⚠️'
-                };
-                
-                icon.textContent = icons[type] || 'ℹ️';
-                document.getElementById('notificationMessage').textContent = message;
-                
-                notification.className = `notification ${type} show`;
-                
-                // Auto-hide
-                setTimeout(() => {
-                    notification.classList.remove('show');
-                }, 3000);
-            }
-
-            setupAutoRefresh() {
-                setInterval(async () => {
-                    if (this.state.isSaving || this.state.editingSectionId !== null) {
-                        return; // Don't refresh while editing
+            loadDemoContent() {
+                this.sections = [
+                    {
+                        id: 0,
+                        title: 'Welcome to MarkFlow',
+                        content: 'This is your personal platform. Edit the `content.md` file to update this site.\n\n## Features\n- Simple markdown editing\n- Automatic updates\n- Dark/light mode\n- Mobile responsive\n- Zero maintenance',
+                        date: new Date().toISOString().split('T')[0],
+                        tags: ['welcome']
                     }
-                    
-                    const result = await this.github.getRawContent();
-                    if (result.success && result.content !== this.state.originalContent) {
-                        console.log('Content updated from GitHub');
-                        this.state.originalContent = result.content;
-                        this.state.sections = this.parser.parseContent(result.content);
-                        this.render();
-                        this.showNotification('Content updated from GitHub', 'info');
-                    }
-                }, 30000); // Check every 30 seconds
-            }
-
-            broadcastUpdate() {
-                // Notify other tabs/windows
-                if (typeof BroadcastChannel !== 'undefined') {
-                    const channel = new BroadcastChannel('neocortex-updates');
-                    channel.postMessage({ type: 'content-updated', timestamp: Date.now() });
-                }
+                ];
             }
         }
 
-        // ========== GLOBAL FUNCTIONS ==========
-        const uiManager = new UIManager();
-
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            uiManager.init();
-            
-            // Listen for updates from other tabs
-            if (typeof BroadcastChannel !== 'undefined') {
-                const channel = new BroadcastChannel('neocortex-updates');
-                channel.addEventListener('message', (event) => {
-                    if (event.data.type === 'content-updated') {
-                        uiManager.loadContent();
-                    }
-                });
-            }
-            
-            // Handle hash navigation
-            window.addEventListener('hashchange', () => {
-                const hash = window.location.hash.substring(1);
-                if (hash) {
-                    uiManager.filterSections(hash);
-                }
-            });
-            
-            // Check initial hash
-            const hash = window.location.hash.substring(1);
-            if (hash) {
-                uiManager.filterSections(hash);
-            }
-        });
-
-        function createNewSection() {
-            const newId = uiManager.state.sections.length;
-            const newSection = {
-                id: newId,
-                title: 'New Thought',
-                content: '# Your New Thought\n\nStart writing here...\n\n## Ideas\n\n- First idea\n- Second idea\n- Third idea\n\n> "The beginning is the most important part of the work." - Plato',
-                date: new Date().toISOString().split('T')[0],
-                tags: ['new', 'draft'],
-                raw: `---
-title: New Thought
-date: ${new Date().toISOString().split('T')[0]}
-tags: new, draft
----
-
-# Your New Thought
-
-Start writing here...
-
-## Ideas
-
-- First idea
-- Second idea
-- Third idea
-
-> "The beginning is the most important part of the work." - Plato`,
-                frontmatter: `title: New Thought\ndate: ${new Date().toISOString().split('T')[0]}\ntags: new, draft`
-            };
-            
-            uiManager.state.sections.push(newSection);
-            uiManager.state.editingSectionId = newId;
-            uiManager.renderSections();
-            
-            // Scroll to new section
-            setTimeout(() => {
-                document.getElementById(`section-${newId}`).scrollIntoView({ behavior: 'smooth' });
-                const editor = document.getElementById(`editor-${newId}`);
-                if (editor) editor.focus();
-            }, 100);
-        }
-
-        function formatText(before, after) {
-            const activeElement = document.activeElement;
-            if (activeElement && activeElement.tagName === 'TEXTAREA') {
-                const start = activeElement.selectionStart;
-                const end = activeElement.selectionEnd;
-                const selected = activeElement.value.substring(start, end);
-                
-                activeElement.value = activeElement.value.substring(0, start) + 
-                                      before + selected + after + 
-                                      activeElement.value.substring(end);
-                
-                activeElement.focus();
-                activeElement.setSelectionRange(start + before.length, end + before.length);
-                
-                // Trigger input event for live preview
-                activeElement.dispatchEvent(new Event('input'));
-            }
-        }
-
-        function copyToClipboard(button) {
-            const codeElement = button.parentElement.querySelector('code');
-            const text = codeElement.textContent;
-            
-            navigator.clipboard.writeText(text).then(() => {
-                const original = button.textContent;
-                button.textContent = '✅ Copied!';
-                setTimeout(() => {
-                    button.textContent = original;
-                }, 2000);
-            }).catch(err => {
-                console.error('Failed to copy:', err);
-                button.textContent = '❌ Failed';
-                setTimeout(() => {
-                    button.textContent = '📋 Copy';
-                }, 2000);
-            });
-        }
+        // ========== INITIALIZE ==========
+        const markflow = new MarkFlow();
 
         function scrollToTop() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Expose functions globally
-        window.uiManager = uiManager;
-        window.createNewSection = createNewSection;
-        window.formatText = formatText;
-        window.copyToClipboard = copyToClipboard;
-        window.scrollToTop = scrollToTop;
+        function toggleTheme() {
+            markflow.toggleTheme();
+        }
+
+        function editContent() {
+            window.open(
+                `https://github.com/${CONFIG.github.user}/${CONFIG.github.repo}/edit/main/${CONFIG.github.file}`,
+                '_blank'
+            );
+        }
+
+        // Load saved theme
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
     </script>
 </body>
 </html>
