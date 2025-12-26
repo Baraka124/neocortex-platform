@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MarkFlow | Live Editor</title>
+    <title>FlowMark | Live Editor</title>
     <style>
         :root {
             --bg: #ffffff;
@@ -11,7 +11,6 @@
             --text: #1e293b;
             --text-light: #64748b;
             --primary: #3b82f6;
-            --accent: #8b5cf6;
             --success: #10b981;
             --border: #e2e8f0;
             --radius: 12px;
@@ -119,7 +118,6 @@
             padding: 2rem;
             margin-bottom: 2rem;
             transition: all 0.3s ease;
-            position: relative;
         }
 
         .content-section:hover {
@@ -137,41 +135,11 @@
         .section-title {
             font-size: 1.5rem;
             color: var(--text);
-            flex: 1;
-        }
-
-        .section-actions {
-            display: flex;
-            gap: 0.5rem;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-
-        .content-section:hover .section-actions {
-            opacity: 1;
-        }
-
-        .action-btn {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-light);
-            padding: 0.5rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.875rem;
-            transition: all 0.2s;
-        }
-
-        .action-btn:hover {
-            background: var(--surface);
-            color: var(--primary);
-            border-color: var(--primary);
         }
 
         .section-date {
             color: var(--text-light);
             font-size: 0.875rem;
-            margin-top: 0.25rem;
         }
 
         .section-content {
@@ -203,25 +171,7 @@
             margin: 1rem 0;
         }
 
-        /* Editor Modal */
-        .editor-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-            padding: 2rem;
-            overflow-y: auto;
-        }
-
-        .editor-modal.active {
-            display: block;
-        }
-
+        /* Editor */
         .editor {
             max-width: 800px;
             margin: 2rem auto;
@@ -246,22 +196,9 @@
             color: var(--text);
         }
 
-        .editor-close {
-            background: transparent;
-            border: none;
-            color: var(--text-light);
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0.5rem;
-        }
-
-        .editor-close:hover {
-            color: var(--primary);
-        }
-
         .editor-textarea {
             width: 100%;
-            min-height: 400px;
+            min-height: 300px;
             font-family: monospace;
             font-size: 14px;
             line-height: 1.6;
@@ -317,23 +254,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Copy Button */
-        .copy-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--radius);
-            cursor: pointer;
-            font-size: 0.875rem;
-            transition: all 0.2s;
-            margin-top: 1rem;
-        }
-
-        .copy-btn:hover {
-            background: #2563eb;
-        }
-
         /* Responsive */
         @media (max-width: 640px) {
             .container {
@@ -349,48 +269,21 @@
                 gap: 0.5rem;
             }
             
-            .section-actions {
-                opacity: 1;
-            }
-            
             .editor {
                 padding: 1rem;
                 margin: 1rem;
-            }
-            
-            .editor-textarea {
-                min-height: 300px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Editor Modal -->
-    <div class="editor-modal" id="editorModal">
-        <div class="editor">
-            <div class="editor-header">
-                <div class="editor-title" id="editorTitle">Edit Content</div>
-                <button class="editor-close" onclick="closeEditor()">×</button>
-            </div>
-            <textarea class="editor-textarea" id="editorTextarea" spellcheck="false"></textarea>
-            <div class="editor-actions">
-                <button class="btn" onclick="closeEditor()">Cancel</button>
-                <button class="btn btn-success" onclick="saveContent()">💾 Copy to Clipboard</button>
-            </div>
-            <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-light);">
-                Copy the markdown and paste it into your <code>content.md</code> file on GitHub.
-            </p>
-        </div>
-    </div>
-
-    <!-- Header -->
     <div class="header">
         <div class="container">
             <div class="header-content">
-                <a href="#" class="logo" onclick="scrollToTop()">📝 MarkFlow</a>
+                <a href="#" class="logo" onclick="scrollToTop()">📝 FlowMark</a>
                 <div class="controls">
                     <button class="btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
-                    <button class="btn btn-primary" onclick="openEditor('new')">+ New Entry</button>
+                    <button class="btn btn-primary" onclick="createNew()">+ New</button>
                 </div>
             </div>
         </div>
@@ -401,184 +294,194 @@
         <div id="contentContainer">
             <div class="loading">
                 <div class="spinner"></div>
-                <p>Loading your content...</p>
+                <p>Loading content...</p>
+            </div>
+        </div>
+
+        <!-- Editor (hidden by default) -->
+        <div class="editor" id="editorContainer" style="display: none;">
+            <div class="editor-header">
+                <div class="editor-title" id="editorTitle">Edit Content</div>
+            </div>
+            <textarea class="editor-textarea" id="editorTextarea" placeholder="Write your content in markdown..."></textarea>
+            <div class="editor-actions">
+                <button class="btn" onclick="hideEditor()">Cancel</button>
+                <button class="btn btn-success" onclick="copyContent()">📋 Copy to GitHub</button>
+            </div>
+            <div style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-light);">
+                <p><strong>How to update:</strong> Copy this content, then paste it into your <code>content.md</code> file on GitHub.</p>
+                <button class="btn" onclick="openGitHub()" style="margin-top: 0.5rem;">
+                    ✏️ Open GitHub Editor
+                </button>
             </div>
         </div>
 
         <div class="footer">
-            <p>Powered by MarkFlow • Edit content directly</p>
+            <p>Powered by FlowMark • Edit locally, sync to GitHub</p>
             <p style="margin-top: 0.5rem; font-size: 0.75rem;">
-                <span id="syncStatus">Loading...</span>
+                No API calls, no 401 errors
             </p>
-            <button class="copy-btn" onclick="copyAllContent()">
-                📋 Copy All Content to Clipboard
-            </button>
         </div>
     </div>
 
     <script>
-        // ========== CONFIG ==========
+        // ========== SIMPLE CONFIG ==========
         const CONFIG = {
-            github: {
-                user: 'Baraka124',
-                repo: 'neocortex-platform',
-                file: 'content.md'
-            }
+            githubUser: 'Baraka124',
+            repoName: 'neocortex-platform',
+            fileName: 'content.md'
         };
 
-        // ========== APP STATE ==========
-        let appState = {
-            sections: [],
-            editingIndex: null,
-            originalContent: ''
-        };
+        // ========== SIMPLE STATE ==========
+        let contentSections = [];
 
-        // ========== MAIN FUNCTIONS ==========
+        // ========== SIMPLE FUNCTIONS ==========
         async function loadContent() {
             try {
-                const url = `https://raw.githubusercontent.com/${CONFIG.github.user}/${CONFIG.github.repo}/main/${CONFIG.github.file}`;
+                // Use raw.githubusercontent.com (public, no auth needed)
+                const url = `https://raw.githubusercontent.com/${CONFIG.githubUser}/${CONFIG.repoName}/main/${CONFIG.fileName}`;
                 const response = await fetch(url);
                 
                 if (response.ok) {
                     const content = await response.text();
-                    appState.originalContent = content;
                     parseContent(content);
                     renderContent();
-                    updateStatus(true);
                 } else {
-                    loadDemoContent();
-                    updateStatus(false);
+                    showDemoContent();
                 }
                 
             } catch (error) {
-                console.log('Error loading:', error);
-                loadDemoContent();
-                updateStatus(false);
+                console.log('Loading content:', error);
+                showDemoContent();
             }
         }
 
-        function parseContent(content) {
-            const rawSections = content.split(/\n---\n/);
-            appState.sections = [];
+        function parseContent(text) {
+            contentSections = [];
+            const sections = text.split(/\n---\n/);
             
-            rawSections.forEach((section, index) => {
+            sections.forEach((section, index) => {
                 if (section.trim()) {
-                    const parsed = parseSection(section, index);
-                    if (parsed) {
-                        appState.sections.push(parsed);
-                    }
+                    contentSections.push({
+                        id: index,
+                        content: section.trim(),
+                        title: getTitle(section),
+                        date: getDate(section)
+                    });
                 }
             });
         }
 
-        function parseSection(text, id) {
-            const lines = text.trim().split('\n');
-            const section = {
-                id: id,
-                title: 'Untitled',
-                content: '',
-                date: new Date().toISOString().split('T')[0],
-                tags: [],
-                raw: text
-            };
-            
-            let inFrontmatter = false;
-            let contentLines = [];
-            
+        function getTitle(text) {
+            const lines = text.split('\n');
             for (const line of lines) {
-                if (line.trim() === '---') {
-                    inFrontmatter = !inFrontmatter;
-                    continue;
+                if (line.startsWith('title:')) {
+                    return line.replace('title:', '').trim();
                 }
-                
-                if (inFrontmatter) {
-                    const match = line.match(/^([^:]+):\s*(.+)$/);
-                    if (match) {
-                        const [, key, value] = match;
-                        const cleanKey = key.trim().toLowerCase();
-                        const cleanValue = value.trim();
-                        
-                        if (cleanKey === 'title') section.title = cleanValue;
-                        if (cleanKey === 'date') section.date = cleanValue;
-                        if (cleanKey === 'tags') section.tags = cleanValue.split(',').map(t => t.trim());
-                    }
-                } else {
-                    contentLines.push(line);
+                if (line.startsWith('# ')) {
+                    return line.replace('# ', '').trim();
                 }
             }
-            
-            section.content = contentLines.join('\n');
-            return section;
+            return 'Untitled';
+        }
+
+        function getDate(text) {
+            const lines = text.split('\n');
+            for (const line of lines) {
+                if (line.startsWith('date:')) {
+                    return line.replace('date:', '').trim();
+                }
+            }
+            return new Date().toISOString().split('T')[0];
         }
 
         function renderContent() {
             const container = document.getElementById('contentContainer');
             
-            if (appState.sections.length === 0) {
+            if (contentSections.length === 0) {
                 container.innerHTML = `
                     <div class="content-section">
-                        <h3>Welcome to MarkFlow</h3>
-                        <p>Click "New Entry" to create your first content.</p>
+                        <h3>Welcome to FlowMark</h3>
+                        <p>Click "New" to create your first content.</p>
                     </div>
                 `;
                 return;
             }
             
-            container.innerHTML = appState.sections.map((section, index) => {
-                const wordCount = section.content.split(/\s+/).length;
-                return `
-                    <article class="content-section">
-                        <div class="section-header">
-                            <div style="flex: 1;">
-                                <h2 class="section-title">${section.title}</h2>
-                                <div class="section-date">
-                                    ${formatDate(section.date)} • ${wordCount} words
-                                </div>
-                            </div>
-                            <div class="section-actions">
-                                <button class="action-btn" onclick="editSection(${index})" title="Edit">
-                                    ✏️ Edit
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="section-content">
-                            ${renderMarkdown(section.content)}
-                        </div>
-                    </article>
-                `;
-            }).join('');
+            container.innerHTML = contentSections.map(section => `
+                <article class="content-section">
+                    <div class="section-header">
+                        <h2 class="section-title">${section.title}</h2>
+                        <span class="section-date">${formatDate(section.date)}</span>
+                    </div>
+                    <div class="section-content">
+                        ${renderMarkdown(section.content)}
+                    </div>
+                    <button class="btn" onclick="editSection(${section.id})" style="margin-top: 1rem;">
+                        ✏️ Edit This Section
+                    </button>
+                </article>
+            `).join('');
         }
 
         function renderMarkdown(text) {
-            return text
-                .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-                .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-                .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                .replace(/`([^`]+)`/g, '<code>$1</code>')
-                .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img alt="$1" src="$2" style="max-width:100%;">')
-                .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
-                .replace(/\n\n/g, '</p><p>')
-                .replace(/\n/g, '<br>');
+            // Simple markdown rendering
+            let html = text;
+            
+            // Headers
+            html = html.replace(/^### (.*$)/gm, '<h3>$1</h3>');
+            html = html.replace(/^## (.*$)/gm, '<h2>$1</h2>');
+            html = html.replace(/^# (.*$)/gm, '<h1>$1</h1>');
+            
+            // Bold and italic
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            
+            // Code
+            html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+            
+            // Links and images
+            html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img alt="$1" src="$2" style="max-width:100%;">');
+            html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+            
+            // Line breaks
+            html = html.replace(/\n/g, '<br>');
+            
+            return html;
+        }
+
+        function formatDate(dateStr) {
+            try {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString();
+            } catch {
+                return 'Recent';
+            }
         }
 
         // ========== EDITING FUNCTIONS ==========
-        function editSection(index) {
-            appState.editingIndex = index;
-            const section = appState.sections[index];
+        let currentEditId = null;
+
+        function editSection(id) {
+            currentEditId = id;
+            const section = contentSections[id];
             
             document.getElementById('editorTitle').textContent = `Edit: ${section.title}`;
-            document.getElementById('editorTextarea').value = section.raw;
-            document.getElementById('editorModal').classList.add('active');
+            document.getElementById('editorTextarea').value = section.content;
+            
+            // Show editor, hide content
+            document.getElementById('contentContainer').style.display = 'none';
+            document.getElementById('editorContainer').style.display = 'block';
+            
+            // Scroll to editor
+            document.getElementById('editorContainer').scrollIntoView({ behavior: 'smooth' });
         }
 
-        function openEditor(type) {
-            if (type === 'new') {
-                appState.editingIndex = null;
-                document.getElementById('editorTitle').textContent = 'New Entry';
-                document.getElementById('editorTextarea').value = `---
+        function createNew() {
+            currentEditId = null;
+            
+            document.getElementById('editorTitle').textContent = 'New Content';
+            document.getElementById('editorTextarea').value = `---
 title: New Entry
 date: ${new Date().toISOString().split('T')[0]}
 tags: idea
@@ -586,48 +489,39 @@ tags: idea
 
 # Your New Entry
 
-Start writing here...`;
-                document.getElementById('editorModal').classList.add('active');
-            }
-        }
+Start writing here...
 
-        function closeEditor() {
-            document.getElementById('editorModal').classList.remove('active');
-            appState.editingIndex = null;
-        }
+## Features
+- Edit locally in your browser
+- Copy to GitHub when ready
+- No API errors
+- Simple and fast`;
 
-        async function saveContent() {
-            const newRaw = document.getElementById('editorTextarea').value;
+            // Show editor, hide content
+            document.getElementById('contentContainer').style.display = 'none';
+            document.getElementById('editorContainer').style.display = 'block';
             
-            // Copy to clipboard
-            try {
-                await navigator.clipboard.writeText(newRaw);
-                alert('✅ Content copied to clipboard!\n\nNow go to GitHub and paste it into your content.md file.');
-                
-                // Open GitHub edit page
-                window.open(
-                    `https://github.com/${CONFIG.github.user}/${CONFIG.github.repo}/edit/main/${CONFIG.github.file}`,
-                    '_blank'
-                );
-                
-                closeEditor();
-            } catch (error) {
-                console.error('Copy failed:', error);
-                alert('Failed to copy. Please copy manually:\n\n' + newRaw);
-            }
+            // Scroll to editor
+            document.getElementById('editorContainer').scrollIntoView({ behavior: 'smooth' });
         }
 
-        async function copyAllContent() {
-            const fullContent = generateFullContent();
+        function hideEditor() {
+            // Show content, hide editor
+            document.getElementById('contentContainer').style.display = 'block';
+            document.getElementById('editorContainer').style.display = 'none';
+            currentEditId = null;
+        }
+
+        async function copyContent() {
+            const content = document.getElementById('editorTextarea').value;
             
             try {
-                await navigator.clipboard.writeText(fullContent);
-                alert('✅ All content copied to clipboard!\n\nYou can now update your content.md file on GitHub.');
+                await navigator.clipboard.writeText(content);
+                alert('✅ Content copied to clipboard!\n\nNow paste it into your GitHub file.');
             } catch (error) {
-                console.error('Copy failed:', error);
                 // Fallback for older browsers
                 const textarea = document.createElement('textarea');
-                textarea.value = fullContent;
+                textarea.value = content;
                 document.body.appendChild(textarea);
                 textarea.select();
                 document.execCommand('copy');
@@ -636,73 +530,12 @@ Start writing here...`;
             }
         }
 
-        function generateFullContent() {
-            return appState.sections.map(section => section.raw).join('\n\n---\n\n');
+        function openGitHub() {
+            const url = `https://github.com/${CONFIG.githubUser}/${CONFIG.repoName}/edit/main/${CONFIG.fileName}`;
+            window.open(url, '_blank');
         }
 
         // ========== UTILITY FUNCTIONS ==========
-        function formatDate(dateStr) {
-            try {
-                const date = new Date(dateStr);
-                const now = new Date();
-                const diff = now - date;
-                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                
-                if (days === 0) return 'Today';
-                if (days === 1) return 'Yesterday';
-                if (days < 7) return `${days} days ago`;
-                return date.toLocaleDateString();
-            } catch {
-                return 'Recent';
-            }
-        }
-
-        function updateStatus(status) {
-            const element = document.getElementById('syncStatus');
-            if (status === true) {
-                element.innerHTML = '<span style="color:#10b981;">●</span> Connected to GitHub';
-            } else if (status === false) {
-                element.innerHTML = '<span style="color:#f59e0b;">●</span> Using demo content';
-            } else {
-                element.innerHTML = `<span style="color:#3b82f6;">●</span> ${status}`;
-            }
-        }
-
-        function loadDemoContent() {
-            appState.sections = [
-                {
-                    id: 0,
-                    title: 'Welcome to MarkFlow',
-                    content: 'This is your live editing platform. Click the edit button (✏️) above to edit this text directly on the page!\n\n## How to Edit:\n1. Click "Edit" button\n2. Make changes in the editor\n3. Click "Copy to Clipboard"\n4. Paste into GitHub\n5. Refresh page to see changes\n\n## Features:\n- **Edit directly** in browser\n- **Copy to clipboard** with one click\n- **Auto-formatting** for markdown\n- **Live preview** of changes',
-                    date: new Date().toISOString().split('T')[0],
-                    tags: ['welcome'],
-                    raw: `---
-title: Welcome to MarkFlow
-date: ${new Date().toISOString().split('T')[0]}
-tags: welcome
----
-
-# Welcome to MarkFlow
-
-This is your live editing platform. Click the edit button (✏️) above to edit this text directly on the page!
-
-## How to Edit:
-1. Click "Edit" button
-2. Make changes in the editor
-3. Click "Copy to Clipboard"
-4. Paste into GitHub
-5. Refresh page to see changes
-
-## Features:
-- **Edit directly** in browser
-- **Copy to clipboard** with one click
-- **Auto-formatting** for markdown
-- **Live preview** of changes`
-                }
-            ];
-            appState.originalContent = appState.sections[0].raw;
-        }
-
         function toggleTheme() {
             document.body.classList.toggle('dark-mode');
             const isDark = document.body.classList.contains('dark-mode');
@@ -712,6 +545,36 @@ This is your live editing platform. Click the edit button (✏️) above to edit
 
         function scrollToTop() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showDemoContent() {
+            contentSections = [{
+                id: 0,
+                title: 'Welcome to FlowMark',
+                date: new Date().toISOString().split('T')[0],
+                content: `---
+title: Welcome to FlowMark
+date: ${new Date().toISOString().split('T')[0]}
+tags: welcome
+---
+
+# Welcome to FlowMark
+
+This is a **simple, error-free** markdown editor.
+
+## How It Works:
+1. **Edit content** directly in your browser
+2. **Copy to clipboard** with one click
+3. **Paste into GitHub** to update your site
+4. **Refresh page** to see changes
+
+## No More 401 Errors!
+This platform doesn't use GitHub API, so you'll never see authentication errors.
+
+## Try It:
+Click the "Edit This Section" button below to start editing!`
+            }];
+            renderContent();
         }
 
         // ========== INITIALIZE ==========
@@ -725,10 +588,10 @@ This is your live editing platform. Click the edit button (✏️) above to edit
             // Load content
             loadContent();
             
-            // Auto-refresh every 30 seconds
+            // Auto-refresh every minute
             setInterval(() => {
                 loadContent();
-            }, 30000);
+            }, 60000);
         });
     </script>
 </body>
