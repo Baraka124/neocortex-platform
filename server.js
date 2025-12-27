@@ -10,450 +10,528 @@ const app = express();
 app.use(express.json());
 app.use(express.static('.'));
 
-const DATA_FILE = path.join(__dirname, 'data.json');
+const DATA_FILE = path.join(__dirname, 'research.json');
 
-// Simple ID generator
-function generateId(author = 'anonymous') {
-    const timestamp = Date.now().toString(36);
-    const random = Math.random().toString(36).substr(2, 5);
-    const safeAuthor = author.toLowerCase().replace(/[^a-z0-9]/g, '-').substr(0, 10);
-    return `${safeAuthor}-${timestamp}-${random}`;
+// Generate unique IDs
+function generateId(prefix = 'proj') {
+    return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
-// Initialize data file
+// Initialize medical research data
 async function initData() {
     try {
         await fs.access(DATA_FILE);
-        console.log('📁 data.json exists');
+        console.log('📁 Research database loaded');
     } catch {
-        console.log('📁 Creating initial data.json');
+        console.log('📁 Creating medical research database...');
+        
         const initialData = {
-            posts: {
-                "welcome": {
-                    id: "welcome",
-                    author: "admin",
-                    title: "Welcome to Our Platform! 🚀",
-                    content: "# Hello World!\n\nThis is a **dynamic blogging platform** with just 3 files!\n\n## Features\n- ✏️ **Anyone can post** (no overwriting)\n- 🔐 **Your content stays separate**\n- 📝 **Markdown support**\n- 🔍 **Search and filter**\n- ⚡ **Real-time updates**\n\n## How It Works\n1. Users create posts (gets unique ID)\n2. Everything stored in `data.json`\n\n## Try It!\nClick the **'+ New Post'** button to create your first post!",
-                    date: new Date().toISOString().split('T')[0],
-                    tags: ["welcome", "platform", "demo"],
-                    status: "published",
-                    views: 0,
-                    likes: 0
+            // Core GSK Projects
+            projects: {
+                "gsk-copd-001": {
+                    id: "gsk-copd-001",
+                    title: "AI-Driven Treatable Traits in COPD",
+                    description: "Machine learning identification of treatable traits in COPD patients for personalized intervention",
+                    status: "active",
+                    phase: "Phase 2",
+                    priority: "high",
+                    tags: ["COPD", "AI", "Treatable-Traits", "GSK", "Clinical"],
+                    lead: "Dr. Baraka",
+                    team: ["clinician1", "researcher2", "data-scientist3"],
+                    institutions: ["GSK", "University-Hospital"],
+                    startDate: "2024-01-15",
+                    endDate: "2024-12-31",
+                    budget: "$500,000",
+                    milestones: [
+                        { id: "m1", title: "Data Collection Complete", status: "completed", date: "2024-02-28" },
+                        { id: "m2", title: "AI Model V1", status: "in-progress", date: "2024-04-15" },
+                        { id: "m3", title: "Clinical Validation", status: "pending", date: "2024-08-30" }
+                    ],
+                    documents: [
+                        { id: "d1", title: "Protocol v2.1", type: "protocol", url: "#", uploaded: "2024-01-20" },
+                        { id: "d2", title: "Ethics Approval", type: "approval", url: "#", uploaded: "2024-01-25" }
+                    ],
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
                 },
-                "example": {
-                    id: "example",
-                    author: "demo",
-                    title: "Example User Post",
-                    content: "# This is an example\n\nUsers can create posts like this!\n\n## Markdown Works\n- **Bold text**\n- *Italic text*\n- `Code snippets`\n- [Links](https://example.com)\n\n## Try Editing\nThis post can be edited or you can create your own!",
-                    date: new Date().toISOString().split('T')[0],
-                    tags: ["example", "demo", "tutorial"],
-                    status: "published",
-                    views: 0,
-                    likes: 0
+                "gsk-asthma-002": {
+                    id: "gsk-asthma-002",
+                    title: "Asthma Exacerbation Prediction Model",
+                    description: "Deep learning model to predict asthma exacerbations using EHR data",
+                    status: "planning",
+                    phase: "Phase 1",
+                    priority: "medium",
+                    tags: ["Asthma", "Prediction", "Deep-Learning", "GSK", "EHR"],
+                    lead: "Dr. Smith",
+                    team: [],
+                    institutions: ["GSK"],
+                    startDate: "2024-03-01",
+                    endDate: "2024-11-30",
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
                 }
             },
-            users: {},
-            config: {
-                allowPublicPosts: true,
-                requireApproval: false,
-                maxPostsPerUser: 100
+            
+            // Research Discussions & Notes
+            discussions: {
+                "disc-001": {
+                    id: "disc-001",
+                    projectId: "gsk-copd-001",
+                    title: "Defining Treatable Traits Criteria",
+                    content: "Discussion about which traits should be considered 'treatable' in our model...",
+                    author: "Dr. Baraka",
+                    type: "clinical",
+                    tags: ["criteria", "definition", "clinical"],
+                    comments: [
+                        { id: "c1", author: "clinician1", content: "Should we include eosinophil count?", date: "2024-01-16" },
+                        { id: "c2", author: "researcher2", content: "Yes, plus FeNO levels", date: "2024-01-16" }
+                    ],
+                    createdAt: "2024-01-15"
+                }
             },
-            meta: {
-                createdAt: new Date().toISOString(),
-                version: "1.0.0"
+            
+            // Team Members
+            members: {
+                "dr-baraka": {
+                    id: "dr-baraka",
+                    name: "Dr. Baraka",
+                    role: "Principal Investigator",
+                    specialty: "Pulmonology",
+                    institution: "University-Hospital",
+                    email: "baraka@hospital.edu",
+                    projects: ["gsk-copd-001"],
+                    status: "active"
+                },
+                "clinician1": {
+                    id: "clinician1",
+                    name: "Dr. Jane Smith",
+                    role: "Clinical Lead",
+                    specialty: "Respiratory Medicine",
+                    institution: "GSK",
+                    email: "j.smith@gsk.com",
+                    projects: ["gsk-copd-001"],
+                    status: "active"
+                }
+            },
+            
+            // AI Models & Datasets
+            models: {
+                "model-001": {
+                    id: "model-001",
+                    name: "COPD Trait Classifier v1",
+                    projectId: "gsk-copd-001",
+                    type: "classification",
+                    framework: "PyTorch",
+                    accuracy: "0.89",
+                    status: "training",
+                    dataset: "copd-ehr-2024",
+                    createdAt: "2024-02-01"
+                }
+            },
+            
+            // Platform Config
+            config: {
+                institution: "GSK Research Collaboration",
+                theme: "medical",
+                privacyLevel: "high",
+                notificationSettings: {
+                    emailAlerts: true,
+                    milestoneUpdates: true,
+                    discussionReplies: true
+                }
             }
         };
+        
         await fs.writeFile(DATA_FILE, JSON.stringify(initialData, null, 2));
-        console.log('✅ Created initial data.json');
+        console.log('✅ Medical research database created');
     }
 }
 
-// 1. Get all posts
-app.get('/api/posts', async (req, res) => {
-    try {
-        console.log('📨 GET /api/posts called');
-        const { author, tag, status, search } = req.query;
-        
-        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
-        
-        let posts = Object.values(data.posts);
-        console.log(`📊 Found ${posts.length} total posts`);
-        
-        // Filtering
-        if (author) {
-            posts = posts.filter(p => p.author === author);
-            console.log(`🔍 Filtered by author "${author}": ${posts.length} posts`);
-        }
-        if (tag) {
-            posts = posts.filter(p => p.tags?.includes(tag));
-            console.log(`🔍 Filtered by tag "${tag}": ${posts.length} posts`);
-        }
-        if (status) {
-            posts = posts.filter(p => p.status === status);
-            console.log(`🔍 Filtered by status "${status}": ${posts.length} posts`);
-        }
-        if (search) {
-            const query = search.toLowerCase();
-            posts = posts.filter(p => 
-                p.title.toLowerCase().includes(query) || 
-                p.content.toLowerCase().includes(query)
-            );
-            console.log(`🔍 Search "${search}": ${posts.length} posts`);
-        }
-        
-        // Sort by date (newest first)
-        posts.sort((a, b) => new Date(b.date) - new Date(a.date));
-        
-        res.json({ 
-            success: true, 
-            posts,
-            count: posts.length,
-            timestamp: new Date().toISOString()
-        });
-        
-    } catch (error) {
-        console.error('❌ Error in /api/posts:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: error.message,
-            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-        });
-    }
-});
+// ========== API ENDPOINTS ==========
 
-// 2. Get single post
-app.get('/api/posts/:id', async (req, res) => {
+// 1. Get all projects
+app.get('/api/projects', async (req, res) => {
     try {
-        console.log(`📨 GET /api/posts/${req.params.id}`);
-        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
-        const post = data.posts[req.params.id];
-        
-        if (!post) {
-            console.log(`❌ Post ${req.params.id} not found`);
-            return res.status(404).json({ success: false, error: 'Post not found' });
-        }
-        
-        // Increment views
-        data.posts[req.params.id].views = (post.views || 0) + 1;
-        await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
-        
-        console.log(`✅ Viewed post ${req.params.id}, views: ${data.posts[req.params.id].views}`);
-        
-        res.json({ 
-            success: true, 
-            post,
-            timestamp: new Date().toISOString()
-        });
-        
-    } catch (error) {
-        console.error(`❌ Error in /api/posts/${req.params.id}:`, error);
-        res.status(500).json({ 
-            success: false, 
-            error: error.message 
-        });
-    }
-});
-
-// 3. Create NEW post (never overwrites!)
-app.post('/api/posts', async (req, res) => {
-    try {
-        console.log('📨 POST /api/posts called');
-        const { author, title, content, tags = [] } = req.body;
-        
-        console.log('📝 Creating post:', { author, title, contentLength: content?.length });
-        
-        if (!title || !content) {
-            console.log('❌ Missing title or content');
-            return res.status(400).json({ 
-                success: false, 
-                error: 'Title and content are required' 
-            });
-        }
-        
+        const { status, tag, lead, institution } = req.query;
         const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
         
-        // Generate unique ID
-        const id = generateId(author || 'anonymous');
-        console.log(`🆔 Generated ID: ${id}`);
+        let projects = Object.values(data.projects);
         
-        const newPost = {
-            id,
-            author: author || 'anonymous',
-            title: title.trim(),
-            content: content.trim(),
-            date: new Date().toISOString().split('T')[0],
-            tags: Array.isArray(tags) ? tags : tags.split(',').map(t => t.trim()).filter(t => t),
-            status: data.config.requireApproval ? 'pending' : 'published',
-            views: 0,
-            likes: 0,
-            comments: [],
-            created: new Date().toISOString()
-        };
+        // Filters for clinicians
+        if (status) projects = projects.filter(p => p.status === status);
+        if (tag) projects = projects.filter(p => p.tags?.includes(tag));
+        if (lead) projects = projects.filter(p => p.lead === lead);
+        if (institution) projects = projects.filter(p => p.institutions?.includes(institution));
         
-        // Add to data (unique key = id)
-        data.posts[id] = newPost;
-        
-        await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
-        
-        console.log(`✅ Post created: ${id} by ${newPost.author}`);
-        
-        res.json({ 
-            success: true, 
-            message: 'Post created successfully!',
-            post: newPost,
-            id,
-            timestamp: new Date().toISOString()
+        // Sort by priority and date
+        projects.sort((a, b) => {
+            const priorityOrder = { high: 1, medium: 2, low: 3 };
+            return priorityOrder[a.priority] - priorityOrder[b.priority] ||
+                   new Date(b.updatedAt) - new Date(a.updatedAt);
         });
         
+        res.json({ success: true, projects, count: projects.length });
     } catch (error) {
-        console.error('❌ Error creating post:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: error.message,
-            details: 'Failed to create post. Please try again.'
-        });
-    }
-});
-
-// 4. Update post
-app.put('/api/posts/:id', async (req, res) => {
-    try {
-        console.log(`📨 PUT /api/posts/${req.params.id}`);
-        const { author, updates } = req.body;
-        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
-        const post = data.posts[req.params.id];
-        
-        if (!post) {
-            console.log(`❌ Post ${req.params.id} not found`);
-            return res.status(404).json({ success: false, error: 'Post not found' });
-        }
-        
-        // Check permissions (simple version)
-        if (post.author !== author && author !== 'admin') {
-            console.log(`❌ Unauthorized: ${author} cannot edit ${post.author}'s post`);
-            return res.status(403).json({ success: false, error: 'Not authorized' });
-        }
-        
-        // Update post
-        data.posts[req.params.id] = {
-            ...post,
-            ...updates,
-            updated: new Date().toISOString()
-        };
-        
-        await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
-        
-        console.log(`✅ Post ${req.params.id} updated by ${author}`);
-        
-        res.json({ 
-            success: true, 
-            message: 'Post updated successfully',
-            post: data.posts[req.params.id]
-        });
-        
-    } catch (error) {
-        console.error(`❌ Error updating post ${req.params.id}:`, error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
-// 5. Delete post (soft delete)
-app.delete('/api/posts/:id', async (req, res) => {
-    try {
-        console.log(`📨 DELETE /api/posts/${req.params.id}`);
-        const { author } = req.body;
-        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
-        const post = data.posts[req.params.id];
-        
-        if (!post) {
-            console.log(`❌ Post ${req.params.id} not found`);
-            return res.status(404).json({ success: false, error: 'Post not found' });
-        }
-        
-        // Check permissions
-        if (post.author !== author && author !== 'admin') {
-            console.log(`❌ Unauthorized delete attempt by ${author}`);
-            return res.status(403).json({ success: false, error: 'Not authorized' });
-        }
-        
-        // Soft delete (change status)
-        data.posts[req.params.id].status = 'deleted';
-        data.posts[req.params.id].deletedAt = new Date().toISOString();
-        data.posts[req.params.id].deletedBy = author;
-        
-        await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
-        
-        console.log(`✅ Post ${req.params.id} soft-deleted by ${author}`);
-        
-        res.json({ 
-            success: true, 
-            message: 'Post deleted successfully'
-        });
-        
-    } catch (error) {
-        console.error(`❌ Error deleting post ${req.params.id}:`, error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// 6. Like a post
-app.post('/api/posts/:id/like', async (req, res) => {
-    try {
-        console.log(`📨 POST /api/posts/${req.params.id}/like`);
-        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
-        const post = data.posts[req.params.id];
-        
-        if (!post) {
-            console.log(`❌ Post ${req.params.id} not found for like`);
-            return res.status(404).json({ success: false, error: 'Post not found' });
-        }
-        
-        data.posts[req.params.id].likes = (post.likes || 0) + 1;
-        await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
-        
-        console.log(`❤️ Post ${req.params.id} liked, total: ${data.posts[req.params.id].likes}`);
-        
-        res.json({ 
-            success: true, 
-            likes: data.posts[req.params.id].likes,
-            message: 'Post liked!'
-        });
-        
-    } catch (error) {
-        console.error(`❌ Error liking post ${req.params.id}:`, error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// 7. Add comment
-app.post('/api/posts/:id/comments', async (req, res) => {
-    try {
-        console.log(`📨 POST /api/posts/${req.params.id}/comments`);
-        const { author, content } = req.body;
-        
-        if (!content) {
-            console.log('❌ No content for comment');
-            return res.status(400).json({ 
-                success: false, 
-                error: 'Comment content is required' 
-            });
-        }
-        
-        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
-        const post = data.posts[req.params.id];
-        
-        if (!post) {
-            console.log(`❌ Post ${req.params.id} not found for comment`);
-            return res.status(404).json({ success: false, error: 'Post not found' });
-        }
-        
-        const comment = {
-            id: `comment-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-            author: author || 'anonymous',
-            content: content.trim(),
-            date: new Date().toISOString(),
-            likes: 0
-        };
-        
-        if (!post.comments) post.comments = [];
-        post.comments.push(comment);
-        
-        await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
-        
-        console.log(`💬 Comment added to post ${req.params.id} by ${comment.author}`);
-        
-        res.json({ 
-            success: true, 
-            comment,
-            message: 'Comment added successfully'
-        });
-        
-    } catch (error) {
-        console.error(`❌ Error adding comment to post ${req.params.id}:`, error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// 8. Get stats
-app.get('/api/stats', async (req, res) => {
-    try {
-        console.log('📨 GET /api/stats');
-        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
-        const posts = Object.values(data.posts);
-        
-        const stats = {
-            totalPosts: posts.length,
-            publishedPosts: posts.filter(p => p.status === 'published').length,
-            totalViews: posts.reduce((sum, p) => sum + (p.views || 0), 0),
-            totalLikes: posts.reduce((sum, p) => sum + (p.likes || 0), 0),
-            totalComments: posts.reduce((sum, p) => sum + ((p.comments || []).length), 0),
-            topAuthors: Object.entries(
-                posts.reduce((acc, p) => {
-                    acc[p.author] = (acc[p.author] || 0) + 1;
-                    return acc;
-                }, {})
-            ).sort((a, b) => b[1] - a[1]).slice(0, 5),
-            recentPosts: posts
-                .filter(p => p.status === 'published')
-                .sort((a, b) => new Date(b.date) - new Date(a.date))
-                .slice(0, 5)
-                .map(p => ({ id: p.id, title: p.title, author: p.author })),
-            platformUptime: new Date() - new Date(data.meta.createdAt)
-        };
-        
-        console.log(`📊 Stats: ${stats.totalPosts} posts, ${stats.totalViews} views`);
-        
-        res.json({ 
-            success: true, 
-            stats,
-            timestamp: new Date().toISOString()
-        });
-        
-    } catch (error) {
-        console.error('❌ Error getting stats:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: error.message 
-        });
-    }
-});
-
-// 9. Debug endpoint
-app.get('/api/debug', async (req, res) => {
+// 2. Get single project with all details
+app.get('/api/projects/:id', async (req, res) => {
     try {
         const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
-        const posts = Object.values(data.posts);
+        const project = data.projects[req.params.id];
+        
+        if (!project) return res.status(404).json({ success: false, error: 'Project not found' });
+        
+        // Get related discussions
+        const discussions = Object.values(data.discussions)
+            .filter(d => d.projectId === req.params.id);
+        
+        // Get team details
+        const teamDetails = project.team.map(memberId => data.members[memberId] || null);
+        
+        // Get related models
+        const models = Object.values(data.models)
+            .filter(m => m.projectId === req.params.id);
         
         res.json({
             success: true,
-            fileExists: true,
-            postCount: posts.length,
-            fileSize: JSON.stringify(data).length,
-            samplePosts: posts.slice(0, 3).map(p => ({
-                id: p.id,
-                title: p.title,
-                author: p.author,
-                status: p.status
-            })),
-            serverTime: new Date().toISOString(),
-            nodeVersion: process.version
+            project,
+            discussions,
+            team: teamDetails,
+            models,
+            analytics: {
+                discussionCount: discussions.length,
+                teamSize: project.team.length,
+                milestoneProgress: project.milestones?.filter(m => m.status === 'completed').length || 0
+            }
         });
     } catch (error) {
-        res.json({
-            success: false,
-            error: error.message,
-            fileExists: false
-        });
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
-// 10. Health check
+// 3. Create new project (for mini-projects within GSK package)
+app.post('/api/projects', async (req, res) => {
+    try {
+        const { title, description, lead, tags, type } = req.body;
+        
+        if (!title || !description) {
+            return res.status(400).json({ success: false, error: 'Title and description required' });
+        }
+        
+        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
+        const id = generateId('gsk');
+        
+        const newProject = {
+            id,
+            title,
+            description,
+            status: "planning",
+            phase: "Phase 1",
+            priority: "medium",
+            tags: [...(tags || []), "GSK", type || "mini-project"],
+            lead: lead || "pending",
+            team: [],
+            institutions: ["GSK"],
+            startDate: new Date().toISOString().split('T')[0],
+            milestones: [],
+            documents: [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+        
+        data.projects[id] = newProject;
+        await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
+        
+        res.json({
+            success: true,
+            message: 'New project created successfully',
+            project: newProject
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// 4. Add team member to project
+app.post('/api/projects/:id/team', async (req, res) => {
+    try {
+        const { memberId, role } = req.body;
+        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
+        const project = data.projects[req.params.id];
+        
+        if (!project) return res.status(404).json({ success: false, error: 'Project not found' });
+        
+        // Create member if doesn't exist
+        if (!data.members[memberId]) {
+            data.members[memberId] = {
+                id: memberId,
+                name: memberId,
+                role: role || "Collaborator",
+                specialty: "To be specified",
+                institution: "GSK Partner",
+                projects: [req.params.id],
+                status: "active"
+            };
+        } else {
+            // Add project to member's list
+            if (!data.members[memberId].projects.includes(req.params.id)) {
+                data.members[memberId].projects.push(req.params.id);
+            }
+        }
+        
+        // Add member to project
+        if (!project.team.includes(memberId)) {
+            project.team.push(memberId);
+            project.updatedAt = new Date().toISOString();
+        }
+        
+        await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
+        
+        res.json({
+            success: true,
+            message: 'Team member added',
+            team: project.team,
+            member: data.members[memberId]
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// 5. Create research discussion
+app.post('/api/discussions', async (req, res) => {
+    try {
+        const { projectId, title, content, author, type, tags } = req.body;
+        
+        if (!projectId || !title || !content) {
+            return res.status(400).json({ success: false, error: 'Missing required fields' });
+        }
+        
+        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
+        const id = generateId('disc');
+        
+        const discussion = {
+            id,
+            projectId,
+            title,
+            content,
+            author: author || "anonymous",
+            type: type || "general",
+            tags: tags || [],
+            comments: [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+        
+        data.discussions[id] = discussion;
+        await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
+        
+        // Update project timestamp
+        if (data.projects[projectId]) {
+            data.projects[projectId].updatedAt = new Date().toISOString();
+            await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
+        }
+        
+        res.json({
+            success: true,
+            message: 'Discussion created',
+            discussion
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// 6. Add comment to discussion
+app.post('/api/discussions/:id/comments', async (req, res) => {
+    try {
+        const { author, content } = req.body;
+        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
+        const discussion = data.discussions[req.params.id];
+        
+        if (!discussion) return res.status(404).json({ success: false, error: 'Discussion not found' });
+        
+        const comment = {
+            id: `comment-${Date.now()}`,
+            author: author || "anonymous",
+            content,
+            date: new Date().toISOString()
+        };
+        
+        discussion.comments.push(comment);
+        discussion.updatedAt = new Date().toISOString();
+        
+        // Update project timestamp
+        if (data.projects[discussion.projectId]) {
+            data.projects[discussion.projectId].updatedAt = new Date().toISOString();
+        }
+        
+        await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
+        
+        res.json({
+            success: true,
+            message: 'Comment added',
+            comment
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// 7. Add milestone to project
+app.post('/api/projects/:id/milestones', async (req, res) => {
+    try {
+        const { title, dueDate, assignee } = req.body;
+        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
+        const project = data.projects[req.params.id];
+        
+        if (!project) return res.status(404).json({ success: false, error: 'Project not found' });
+        
+        const milestone = {
+            id: `m${(project.milestones?.length || 0) + 1}`,
+            title,
+            status: "pending",
+            dueDate,
+            assignee,
+            createdAt: new Date().toISOString()
+        };
+        
+        if (!project.milestones) project.milestones = [];
+        project.milestones.push(milestone);
+        project.updatedAt = new Date().toISOString();
+        
+        await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
+        
+        res.json({
+            success: true,
+            message: 'Milestone added',
+            milestone
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// 8. Update milestone status
+app.put('/api/projects/:projectId/milestones/:milestoneId', async (req, res) => {
+    try {
+        const { status, notes } = req.body;
+        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
+        const project = data.projects[req.params.projectId];
+        
+        if (!project) return res.status(404).json({ success: false, error: 'Project not found' });
+        
+        const milestone = project.milestones?.find(m => m.id === req.params.milestoneId);
+        if (!milestone) return res.status(404).json({ success: false, error: 'Milestone not found' });
+        
+        milestone.status = status || milestone.status;
+        milestone.notes = notes;
+        milestone.updatedAt = new Date().toISOString();
+        project.updatedAt = new Date().toISOString();
+        
+        await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
+        
+        res.json({
+            success: true,
+            message: 'Milestone updated',
+            milestone
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// 9. Get platform analytics
+app.get('/api/analytics', async (req, res) => {
+    try {
+        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
+        const projects = Object.values(data.projects);
+        const discussions = Object.values(data.discussions);
+        const members = Object.values(data.members);
+        
+        const analytics = {
+            projects: {
+                total: projects.length,
+                active: projects.filter(p => p.status === 'active').length,
+                planning: projects.filter(p => p.status === 'planning').length,
+                completed: projects.filter(p => p.status === 'completed').length,
+                byPhase: {
+                    phase1: projects.filter(p => p.phase === 'Phase 1').length,
+                    phase2: projects.filter(p => p.phase === 'Phase 2').length,
+                    phase3: projects.filter(p => p.phase === 'Phase 3').length
+                }
+            },
+            collaboration: {
+                totalMembers: members.length,
+                activeDiscussions: discussions.length,
+                totalComments: discussions.reduce((sum, d) => sum + (d.comments?.length || 0), 0),
+                institutions: [...new Set(members.map(m => m.institution))]
+            },
+            timeline: {
+                recentProjects: projects
+                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                    .slice(0, 5)
+                    .map(p => ({ id: p.id, title: p.title, status: p.status })),
+                upcomingMilestones: projects
+                    .flatMap(p => p.milestones?.map(m => ({ ...m, projectId: p.id, projectTitle: p.title })) || [])
+                    .filter(m => m.status === 'pending')
+                    .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+                    .slice(0, 5)
+            }
+        };
+        
+        res.json({ success: true, analytics });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// 10. Search across everything
+app.get('/api/search', async (req, res) => {
+    try {
+        const { q } = req.query;
+        if (!q) return res.json({ success: true, results: [] });
+        
+        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
+        const query = q.toLowerCase();
+        
+        const results = {
+            projects: Object.values(data.projects).filter(p => 
+                p.title.toLowerCase().includes(query) || 
+                p.description.toLowerCase().includes(query) ||
+                p.tags?.some(tag => tag.toLowerCase().includes(query))
+            ),
+            discussions: Object.values(data.discussions).filter(d => 
+                d.title.toLowerCase().includes(query) || 
+                d.content.toLowerCase().includes(query)
+            ),
+            members: Object.values(data.members).filter(m => 
+                m.name.toLowerCase().includes(query) || 
+                m.specialty.toLowerCase().includes(query)
+            )
+        };
+        
+        res.json({ success: true, query, results });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// 11. Health check
 app.get('/health', (req, res) => {
-    res.json({ 
-        status: '🚀 Healthy', 
+    res.json({
+        status: '🏥 Medical Collaboration Platform Active',
+        service: 'GSK Research Collaboration',
         timestamp: new Date().toISOString(),
-        version: '1.0.0',
-        endpoints: ['/api/posts', '/api/stats', '/health', '/api/debug']
+        endpoints: [
+            '/api/projects',
+            '/api/discussions', 
+            '/api/analytics',
+            '/api/search'
+        ]
     });
 });
 
@@ -461,8 +539,7 @@ app.get('/health', (req, res) => {
 await initData();
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`🚀 Blog platform running on port ${PORT}`);
-    console.log(`📁 Data file: ${DATA_FILE}`);
-    console.log(`🌐 Health check: http://localhost:${PORT}/health`);
-    console.log(`🔧 Debug: http://localhost:${PORT}/api/debug`);
+    console.log(`🏥 MedCollab AI Platform running on port ${PORT}`);
+    console.log(`🔬 GSK Projects: ${Object.keys(JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8')).projects).length}`);
+    console.log(`👨‍⚕️ Team Members: ${Object.keys(JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8')).members).length}`);
 });
