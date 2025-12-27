@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project View | ThoraxLab</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #1a73e8;
+            --clinical-green: #00c853;
+            --research-purple: #7b1fa2;
+            --light-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-medium: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --radius-sm: 8px;
+            --radius-md: 14px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Header */
+        .project-header {
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo-main {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--light-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            color: var(--text-medium);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: var(--border-color);
+        }
+
+        /* Main Grid */
+        .project-grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 1024px) {
+            .project-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Left Column - Project Details */
+        .project-details {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        .project-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .project-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: rgba(0, 200, 83, 0.1);
+            color: var(--clinical-green);
+        }
+
+        .status-planning {
+            background: rgba(255, 152, 0, 0.1);
+            color: #ff9800;
+        }
+
+        .priority-badge {
+            padding: 0.5rem 1rem;
+            background: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .project-description {
+            font-size: 1.125rem;
+            color: var(--text-medium);
+            line-height: 1.8;
+            margin-bottom: 2rem;
+            white-space: pre-line;
+        }
+
+        /* Tags */
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .tag {
+            padding: 0.5rem 1rem;
+            background: var(--light-bg);
+            color: var(--text-medium);
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .tag-clinical {
+            background: rgba(0, 200, 83, 0.1);
+            color: var(--clinical-green);
+        }
+
+        /* Right Column - Sidebar */
+        .project-sidebar {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            height: fit-content;
+        }
+
+        .sidebar-section {
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .team-member {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .team-member:last-child {
+            border-bottom: none;
+        }
+
+        .member-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--light-bg);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        .member-info h4 {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .member-info p {
+            font-size: 0.8125rem;
+            color: var(--text-medium);
+        }
+
+        /* Discussions */
+        .discussions-section {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            margin-bottom: 3rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .new-discussion-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .new-discussion-btn:hover {
+            background: #1557b0;
+            transform: translateY(-1px);
+        }
+
+        .discussion-card {
+            background: var(--light-bg);
+            border-radius: var(--radius-sm);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        .discussion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .discussion-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .discussion-author {
+            font-size: 0.875rem;
+            color: var(--text-medium);
+        }
+
+        .discussion-content {
+            color: var(--text-dark);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .vote-controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .vote-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .vote-btn.support {
+            color: var(--clinical-green);
+        }
+
+        .vote-btn.concern {
+            color: #f44336;
+        }
+
+        .vote-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            color: var(--text-medium);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: var(--text-medium);
+            border-top: 1px solid var(--border-color);
+            margin-top: 3rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 2rem;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 0.875rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+        }
+
+        .form-textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="project-header">
+        <div class="container">
+            <div class="header-content">
+                <div>
+                    <div class="logo-main">ThoraxLab</div>
+                    <div style="color: var(--text-medium); font-size: 0.875rem; margin-top: 0.25rem;">
+                        Collaborative Innovation Platform
+                    </div>
+                </div>
+                <a href="/" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Projects
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Loading State -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <div class="mt-2">Loading project details...</div>
+        </div>
+
+        <!-- Project Content (Initially Hidden) -->
+        <div id="projectContent" style="display: none;">
+            <!-- Main Grid -->
+            <div class="project-grid">
+                <!-- Left Column -->
+                <div class="project-details">
+                    <h1 class="project-title" id="projectTitle">Loading...</h1>
+                    
+                    <div class="project-meta">
+                        <span class="status-badge status-planning" id="projectStatus">Planning</span>
+                        <span class="priority-badge" id="projectPriority">High Priority</span>
+                        <span style="color: var(--text-medium);" id="projectPhase">Phase 1</span>
+                    </div>
+
+                    <div class="project-description" id="projectDescription">
+                        Loading project description...
+                    </div>
+
+                    <div class="tags-container" id="projectTags">
+                        <!-- Tags will be inserted here -->
+                    </div>
+
+                    <div class="sidebar-section">
+                        <h3 class="sidebar-title">
+                            <i class="fas fa-calendar-alt"></i>
+                            Project Timeline
+                        </h3>
+                        <div style="color: var(--text-medium);">
+                            <div style="margin-bottom: 0.5rem;">
+                                <strong>Started:</strong> <span id="projectStartDate">Loading...</span>
+                            </div>
+                            <div>
+                                <strong>Last Updated:</strong> <span id="projectUpdatedAt">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column - Sidebar -->
+                <div class="project-sidebar">
+                    <div class="sidebar-section">
+                        <h3 class="sidebar-title">
+                            <i class="fas fa-user-md"></i>
+                            Project Lead
+                        </h3>
+                        <div class="team-member">
+                            <div class="member-avatar" id="leadInitials">DR</div>
+                            <div class="member-info">
+                                <h4 id="projectLead">Dr. Loading...</h4>
+                                <p>Principal Investigator</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-section">
+                        <h3 class="sidebar-title">
+                            <i class="fas fa-users"></i>
+                            Team Members
+                        </h3>
+                        <div id="teamMembers">
+                            <div class="team-member">
+                                <div class="member-avatar">TM</div>
+                                <div class="member-info">
+                                    <h4>Team Member</h4>
+                                    <p>Role</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-section">
+                        <h3 class="sidebar-title">
+                            <i class="fas fa-chart-line"></i>
+                            Project Analytics
+                        </h3>
+                        <div style="color: var(--text-medium);">
+                            <div style="margin-bottom: 0.5rem;">
+                                <strong>Discussions:</strong> <span id="discussionCount">0</span>
+                            </div>
+                            <div style="margin-bottom: 0.5rem;">
+                                <strong>Team Size:</strong> <span id="teamSize">0</span>
+                            </div>
+                            <div>
+                                <strong>Consensus Rate:</strong> <span id="consensusRate">0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="new-discussion-btn" style="width: 100%; margin-top: 1rem;" onclick="openNewDiscussionModal()">
+                        <i class="fas fa-plus"></i>
+                        New Discussion
+                    </button>
+                </div>
+            </div>
+
+            <!-- Discussions Section -->
+            <div class="discussions-section">
+                <div class="section-header">
+                    <h2 style="font-size: 1.5rem; font-weight: 600;">Project Discussions</h2>
+                    <button class="new-discussion-btn" onclick="openNewDiscussionModal()">
+                        <i class="fas fa-plus"></i>
+                        Start Discussion
+                    </button>
+                </div>
+
+                <div id="discussionsList">
+                    <div class="discussion-card">
+                        <div class="discussion-header">
+                            <div>
+                                <h3 class="discussion-title">Loading discussions...</h3>
+                                <div class="discussion-author">System</div>
+                            </div>
+                        </div>
+                        <div class="discussion-content">
+                            Please wait while we load the discussions for this project.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="logo-main" style="font-size: 1.25rem; margin-bottom: 0.5rem;">ThoraxLab</div>
+            <p>Pulmonology Department Innovation Platform</p>
+            <p style="font-size: 0.875rem; margin-top: 0.5rem; color: var(--text-light);">
+                © 2024 Collaborative Research Network
+            </p>
+        </div>
+    </footer>
+
+    <!-- New Discussion Modal -->
+    <div class="modal" id="newDiscussionModal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="font-size: 1.5rem; font-weight: 600;">Start New Discussion</h2>
+                <button onclick="closeModal('newDiscussionModal')" style="background: none; border: none; font-size: 1.5rem; color: var(--text-medium); cursor: pointer;">
+                    ×
+                </button>
+            </div>
+
+            <form onsubmit="createNewDiscussion(event)">
+                <input type="hidden" id="modalProjectId">
+                
+                <div class="form-group">
+                    <label class="form-label">Discussion Topic</label>
+                    <input type="text" class="form-input" id="discussionTopic" 
+                           placeholder="e.g., Patient selection criteria for biomarker analysis" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Your Insight or Question</label>
+                    <textarea class="form-textarea" id="discussionContent" 
+                              placeholder="Share your clinical perspective, research question, or concern..." 
+                              required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Your Name</label>
+                    <input type="text" class="form-input" id="discussionAuthor" 
+                           placeholder="Dr. First Last, Credentials" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Key Clinical Areas (Optional)</label>
+                    <input type="text" class="form-input" id="discussionHighlights" 
+                           placeholder="e.g., patient safety, feasibility, ethics">
+                    <small style="color: var(--text-medium); font-size: 0.875rem;">Separate with commas</small>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="button" style="flex: 1; padding: 0.875rem; background: var(--light-bg); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-medium); cursor: pointer;" 
+                            onclick="closeModal('newDiscussionModal')">
+                        Cancel
+                    </button>
+                    <button type="submit" style="flex: 1; padding: 0.875rem; background: var(--primary-blue); color: white; border: none; border-radius: var(--radius-sm); font-weight: 500; cursor: pointer;">
+                        Post Discussion
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Get project ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectId = urlParams.get('id');
+
+        // Current user from localStorage
+        let currentUser = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for saved user
+            const savedUser = localStorage.getItem('thoraxlab_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                if (document.getElementById('discussionAuthor')) {
+                    document.getElementById('discussionAuthor').value = currentUser.name;
+                }
+            }
+
+            if (projectId) {
+                loadProjectDetails(projectId);
+                loadDiscussions(projectId);
+            } else {
+                document.getElementById('loading').innerHTML = `
+                    <div style="color: #f44336; font-size: 1.125rem;">
+                        No project selected. Please go back and select a project.
+                    </div>
+                    <a href="/" class="back-btn" style="margin-top: 1rem; display: inline-block;">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Projects
+                    </a>
+                `;
+            }
+        });
+
+        async function loadProjectDetails(projectId) {
+            try {
+                const response = await fetch(`/api/projects/${projectId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const project = data.project;
+                    
+                    // Update UI
+                    document.getElementById('projectTitle').textContent = project.title;
+                    document.getElementById('projectDescription').textContent = project.description;
+                    document.getElementById('projectLead').textContent = project.lead;
+                    document.getElementById('projectStatus').textContent = project.status;
+                    document.getElementById('projectStatus').className = 
+                        `status-badge ${project.status === 'active' ? 'status-active' : 'status-planning'}`;
+                    document.getElementById('projectPriority').textContent = `${project.priority} Priority`;
+                    document.getElementById('projectPhase').textContent = project.phase;
+                    document.getElementById('projectStartDate').textContent = formatDate(project.startDate);
+                    document.getElementById('projectUpdatedAt').textContent = formatDate(project.updatedAt);
+                    
+                    // Lead initials for avatar
+                    const leadInitials = project.lead.split(' ').map(n => n[0]).join('').toUpperCase();
+                    document.getElementById('leadInitials').textContent = leadInitials.substring(0, 2);
+                    
+                    // Tags
+                    const tagsContainer = document.getElementById('projectTags');
+                    tagsContainer.innerHTML = '';
+                    if (project.tags && project.tags.length > 0) {
+                        project.tags.forEach(tag => {
+                            const isClinical = tag.toLowerCase().includes('clinical') || 
+                                             tag.toLowerCase().includes('patient') ||
+                                             tag.toLowerCase().includes('trial');
+                            const tagEl = document.createElement('span');
+                            tagEl.className = `tag ${isClinical ? 'tag-clinical' : ''}`;
+                            tagEl.textContent = tag;
+                            tagsContainer.appendChild(tagEl);
+                        });
+                    }
+                    
+                    // Team members
+                    const teamContainer = document.getElementById('teamMembers');
+                    teamContainer.innerHTML = '';
+                    if (data.team && data.team.length > 0) {
+                        data.team.forEach(member => {
+                            if (member) {
+                                const memberEl = document.createElement('div');
+                                memberEl.className = 'team-member';
+                                const initials = member.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                                memberEl.innerHTML = `
+                                    <div class="member-avatar">${initials.substring(0, 2)}</div>
+                                    <div class="member-info">
+                                        <h4>${member.name.split(',')[0]}</h4>
+                                        <p>${member.role || 'Collaborator'}</p>
+                                    </div>
+                                `;
+                                teamContainer.appendChild(memberEl);
+                            }
+                        });
+                    }
+                    
+                    // Analytics
+                    document.getElementById('discussionCount').textContent = data.analytics?.discussionCount || 0;
+                    document.getElementById('teamSize').textContent = data.analytics?.teamSize || 0;
+                    document.getElementById('consensusRate').textContent = `${data.analytics?.consensusScore || 0}%`;
+                    
+                    // Set project ID in modal
+                    document.getElementById('modalProjectId').value = projectId;
+                    
+                    // Show content
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('projectContent').style.display = 'block';
+                    
+                } else {
+                    document.getElementById('loading').innerHTML = `
+                        <div style="color: #f44336; font-size: 1.125rem;">
+                            Project not found: ${data.error}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading project:', error);
+                document.getElementById('loading').innerHTML = `
+                    <div style="color: #f44336; font-size: 1.125rem;">
+                        Error loading project. Please try again.
+                    </div>
+                `;
+            }
+        }
+
+        async function loadDiscussions(projectId) {
+            try {
+                const response = await fetch(`/api/projects/${projectId}`);
+                const data = await response.json();
+                
+                if (data.success && data.discussions) {
+                    const discussionsContainer = document.getElementById('discussionsList');
+                    
+                    if (data.discussions.length === 0) {
+                        discussionsContainer.innerHTML = `
+                            <div class="discussion-card">
+                                <div class="discussion-header">
+                                    <div>
+                                        <h3 class="discussion-title">No discussions yet</h3>
+                                        <div class="discussion-author">Start the conversation!</div>
+                                    </div>
+                                </div>
+                                <div class="discussion-content">
+                                    Be the first to share your clinical insights or research questions about this project.
+                                </div>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    discussionsContainer.innerHTML = data.discussions.map(discussion => `
+                        <div class="discussion-card">
+                            <div class="discussion-header">
+                                <div>
+                                    <h3 class="discussion-title">${escapeHtml(discussion.title)}</h3>
+                                    <div class="discussion-author">
+                                        ${escapeHtml(discussion.author)} • ${formatDate(discussion.createdAt)}
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 0.5rem; font-size: 0.875rem;">
+                                    <span style="color: var(--clinical-green); font-weight: 500;">
+                                        👍 ${discussion.upvotes || 0}
+                                    </span>
+                                    <span style="color: #f44336; font-weight: 500;">
+                                        👎 ${discussion.downvotes || 0}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="discussion-content">
+                                ${escapeHtml(discussion.content)}
+                            </div>
+                            
+                            ${discussion.highlights ? `
+                                <div style="margin: 1rem 0; padding: 0.75rem; background: rgba(26, 115, 232, 0.05); border-radius: var(--radius-sm);">
+                                    <strong style="font-size: 0.875rem; color: var(--text-medium);">Clinical Areas:</strong>
+                                    <div style="margin-top: 0.5rem;">
+                                        ${discussion.highlights.split(',').map(h => `
+                                            <span style="display: inline-block; padding: 0.25rem 0.75rem; background: white; border: 1px solid var(--border-color); border-radius: 20px; font-size: 0.75rem; margin-right: 0.5rem; margin-bottom: 0.5rem;">
+                                                ${h.trim()}
+                                            </span>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                            
+                            <div class="vote-controls">
+                                <button class="vote-btn support" onclick="voteDiscussion('${discussion.id}', 'up')">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    Support (${discussion.upvotes || 0})
+                                </button>
+                                <button class="vote-btn concern" onclick="voteDiscussion('${discussion.id}', 'down')">
+                                    <i class="fas fa-thumbs-down"></i>
+                                    Concern (${discussion.downvotes || 0})
+                                </button>
+                            </div>
+                            
+                            ${discussion.comments && discussion.comments.length > 0 ? `
+                                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                                    <div style="font-size: 0.875rem; color: var(--text-medium); margin-bottom: 0.75rem;">
+                                        ${discussion.comments.length} comment${discussion.comments.length > 1 ? 's' : ''}
+                                    </div>
+                                    ${discussion.comments.map(comment => `
+                                        <div style="padding: 0.75rem; background: white; border-radius: var(--radius-sm); margin-bottom: 0.5rem; border: 1px solid var(--border-color);">
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                                <strong style="font-size: 0.875rem;">${escapeHtml(comment.author)}</strong>
+                                                <span style="font-size: 0.75rem; color: var(--text-medium);">
+                                                    ${formatDate(comment.date)}
+                                                </span>
+                                            </div>
+                                            <div style="font-size: 0.875rem; color: var(--text-dark);">
+                                                ${escapeHtml(comment.content)}
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading discussions:', error);
+            }
+        }
+
+        function openNewDiscussionModal() {
+            if (!currentUser) {
+                alert('Please identify yourself to start a discussion');
+                return;
+            }
+            document.getElementById('newDiscussionModal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        async function createNewDiscussion(event) {
+            event.preventDefault();
+            
+            const discussion = {
+                projectId: document.getElementById('modalProjectId').value,
+                title: document.getElementById('discussionTopic').value,
+                content: document.getElementById('discussionContent').value,
+                author: document.getElementById('discussionAuthor').value,
+                highlights: document.getElementById('discussionHighlights').value
+            };
+            
+            try {
+                const response = await fetch('/api/discussions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(discussion)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    closeModal('newDiscussionModal');
+                    // Clear form
+                    event.target.reset();
+                    // Reload discussions
+                    loadDiscussions(projectId);
+                    // Show success message
+                    alert('Discussion started successfully!');
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to create discussion');
+            }
+        }
+
+        async function voteDiscussion(discussionId, voteType) {
+            if (!currentUser) {
+                alert('Please identify yourself to vote');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/discussions/${discussionId}/vote`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: currentUser.id || currentUser.name,
+                        voteType: voteType,
+                        userRole: currentUser.role
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    // Reload discussions to show updated votes
+                    loadDiscussions(projectId);
+                }
+            } catch (error) {
+                console.error('Error voting:', error);
+            }
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return 'Unknown';
+            try {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+            } catch {
+                return dateStr;
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
