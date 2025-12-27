@@ -22,12 +22,14 @@
         .active { background: #d4edda; color: #155724; }
         .planning { background: #fff3cd; color: #856404; }
         .tag { display: inline-block; background: #e8f4fd; color: #1a73e8; padding: 4px 8px; border-radius: 12px; font-size: 12px; margin-right: 5px; margin-bottom: 5px; }
-        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
         .modal.active { display: flex; }
         .modal-content { background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
         .form-group { margin-bottom: 15px; }
         .form-input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
         .loading { text-align: center; padding: 40px; color: #666; }
+        .discussion-modal { max-width: 800px; }
+        .close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: #666; }
     </style>
 </head>
 <body>
@@ -95,16 +97,17 @@
     <!-- Create Discussion Modal -->
     <div class="modal" id="createDiscussionModal">
         <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('createDiscussionModal')">×</button>
             <h2 style="margin-bottom: 20px;">Start Discussion</h2>
             <form onsubmit="createDiscussion(event)">
                 <input type="hidden" id="discussionProjectId">
                 <div class="form-group">
                     <label>Title</label>
-                    <input type="text" class="form-input" id="discussionTitle" required>
+                    <input type="text" class="form-input" id="discussionTitle" placeholder="e.g., Data requirements for asthma prediction" required>
                 </div>
                 <div class="form-group">
                     <label>Your Comment</label>
-                    <textarea class="form-input" id="discussionContent" rows="4" required></textarea>
+                    <textarea class="form-input" id="discussionContent" rows="4" placeholder="Start the discussion here..." required></textarea>
                 </div>
                 <div class="form-group">
                     <label>Your Name</label>
@@ -216,13 +219,79 @@
                     closeModal('createProjectModal');
                     loadProjects();
                     alert('Project created successfully!');
-                    // Clear form
                     e.target.reset();
                 } else {
                     alert('Error: ' + data.error);
                 }
             } catch (error) {
                 alert('Failed to create project');
+            }
+        }
+        
+        async function viewProject(projectId) {
+            try {
+                const response = await fetch(`${API_BASE}/api/projects/${projectId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const project = data.project;
+                    const discussions = data.discussions;
+                    
+                    const modal = document.createElement('div');
+                    modal.className = 'modal active';
+                    modal.innerHTML = `
+                        <div class="modal-content discussion-modal">
+                            <button class="close-btn" onclick="this.closest('.modal').remove()">×</button>
+                            <h2>${escapeHtml(project.title)}</h2>
+                            <div style="margin: 15px 0;">
+                                <span class="project-status ${project.status}">${project.status}</span>
+                                <span class="tag">${project.phase}</span>
+                            </div>
+                            <p style="margin: 15px 0; line-height: 1.6;">${escapeHtml(project.description)}</p>
+                            <div style="margin: 15px 0;">
+                                <strong>Tags:</strong> ${(project.tags || []).map(t => `<span class="tag">${t}</span>`).join('')}
+                            </div>
+                            <div style="margin: 15px 0;">
+                                <strong>Lead:</strong> ${escapeHtml(project.lead)}<br>
+                                <strong>Team:</strong> ${project.team.length} members<br>
+                                <strong>Started:</strong> ${formatDate(project.startDate)}
+                            </div>
+                            
+                            <h3 style="margin: 20px 0 10px 0;">Discussions (${discussions.length})</h3>
+                            ${discussions.length ? discussions.map(d => `
+                                <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px;">
+                                    <div style="font-weight: bold; margin-bottom: 5px;">${escapeHtml(d.title)}</div>
+                                    <div style="font-size: 13px; color: #666; margin-bottom: 10px;">
+                                        By ${escapeHtml(d.author)} • ${formatDate(d.createdAt)}
+                                    </div>
+                                    <p style="font-size: 14px;">${escapeHtml(d.content)}</p>
+                                    ${d.comments && d.comments.length ? `
+                                        <div style="margin-top: 10px; padding-left: 15px; border-left: 3px solid #1a73e8;">
+                                            <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Comments:</div>
+                                            ${d.comments.map(c => `
+                                                <div style="margin-bottom: 8px; padding: 8px; background: #f8f9fa; border-radius: 4px;">
+                                                    <div style="font-weight: bold; font-size: 12px;">${escapeHtml(c.author)}:</div>
+                                                    <div style="font-size: 13px;">${escapeHtml(c.content)}</div>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `).join('') : '<p>No discussions yet</p>'}
+                            
+                            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                                <button class="btn" onclick="openDiscussionModal('${projectId}'); this.closest('.modal').remove();">Start Discussion</button>
+                                <button class="btn" onclick="addTeamMember('${projectId}')" style="background: #28a745;">Add Team Member</button>
+                                <button class="btn" onclick="this.closest('.modal').remove()" style="background: #6c757d;">Close</button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.body.appendChild(modal);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to load project details');
             }
         }
         
@@ -252,64 +321,47 @@
                 
                 if (data.success) {
                     closeModal('createDiscussionModal');
-                    alert('Discussion started!');
-                    e.target.reset();
+                    alert('Discussion started successfully!');
+                    
+                    // Reset form
+                    document.getElementById('discussionTitle').value = '';
+                    document.getElementById('discussionContent').value = '';
+                    document.getElementById('discussionAuthor').value = '';
+                    
+                    // Reload projects to show new discussion
+                    loadProjects();
+                } else {
+                    alert('Error: ' + data.error);
                 }
             } catch (error) {
+                console.error('Error:', error);
                 alert('Failed to create discussion');
             }
         }
         
-        async function viewProject(projectId) {
-            try {
-                const response = await fetch(`${API_BASE}/api/projects/${projectId}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    const project = data.project;
-                    const discussions = data.discussions;
-                    
-                    const modal = document.createElement('div');
-                    modal.className = 'modal active';
-                    modal.innerHTML = `
-                        <div class="modal-content">
-                            <h2>${escapeHtml(project.title)}</h2>
-                            <div style="margin: 15px 0;">
-                                <span class="project-status ${project.status}">${project.status}</span>
-                                <span class="tag">${project.phase}</span>
-                            </div>
-                            <p style="margin: 15px 0; line-height: 1.6;">${escapeHtml(project.description)}</p>
-                            <div style="margin: 15px 0;">
-                                <strong>Tags:</strong> ${(project.tags || []).map(t => `<span class="tag">${t}</span>`).join('')}
-                            </div>
-                            <div style="margin: 15px 0;">
-                                <strong>Lead:</strong> ${escapeHtml(project.lead)}<br>
-                                <strong>Team:</strong> ${project.team.length} members<br>
-                                <strong>Started:</strong> ${formatDate(project.startDate)}
-                            </div>
-                            
-                            <h3 style="margin: 20px 0 10px 0;">Discussions (${discussions.length})</h3>
-                            ${discussions.length ? discussions.map(d => `
-                                <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px;">
-                                    <div style="font-weight: bold; margin-bottom: 5px;">${escapeHtml(d.title)}</div>
-                                    <div style="font-size: 13px; color: #666; margin-bottom: 10px;">
-                                        By ${escapeHtml(d.author)} • ${formatDate(d.createdAt)}
-                                    </div>
-                                    <p style="font-size: 14px;">${escapeHtml(d.content)}</p>
-                                </div>
-                            `).join('') : '<p>No discussions yet</p>'}
-                            
-                            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                                <button class="btn" onclick="openDiscussionModal('${projectId}')">Start Discussion</button>
-                                <button class="btn" onclick="this.closest('.modal').remove()" style="background: #6c757d;">Close</button>
-                            </div>
-                        </div>
-                    `;
-                    
-                    document.body.appendChild(modal);
-                }
-            } catch (error) {
-                console.error('Error:', error);
+        function addTeamMember(projectId) {
+            const memberName = prompt('Enter team member name:');
+            if (memberName) {
+                fetch(`${API_BASE}/api/projects/${projectId}/team`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ memberId: memberName.toLowerCase().replace(/\s+/g, '-'), role: 'Collaborator' })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Team member added!');
+                        // Refresh the project view
+                        document.querySelector('.modal.active')?.remove();
+                        viewProject(projectId);
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to add team member');
+                });
             }
         }
         
@@ -330,7 +382,7 @@
         function formatDate(dateStr) {
             if (!dateStr) return 'Unknown';
             const date = new Date(dateStr);
-            return date.toLocaleDateString();
+            return date.toLocaleDateString('en-GB'); // DD/MM/YYYY format
         }
         
         // Initialize
