@@ -1,0 +1,22 @@
+{
+  "posts": {
+    "admin-welcome": {
+      "id": "admin-welcome",
+      "author": "admin",
+      "title": "Welcome to My Platform",
+      "content": "# Welcome!\n\nThis is my main post...",
+      "date": "2024-01-15",
+      "tags": ["welcome", "admin"],
+      "status": "published"
+    },
+    "user-john-first": {
+      "id": "user-john-first", 
+      "author": "john123",
+      "title": "My First User Post",
+      "content": "# Hello World!\n\nI'm a user posting here...",
+      "date": "2024-01-16",
+      "tags": ["user", "hello"],
+      "status": "published"
+    }
+  }
+}
