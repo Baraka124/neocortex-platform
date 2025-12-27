@@ -1,5 +1,5 @@
 {
-  "name": "3file-blog",
+  "name": "medcollab-ai",
   "version": "1.0.0",
   "type": "module",
   "main": "server.js",
@@ -11,5 +11,15 @@
   },
   "engines": {
     "node": ">=18.0.0"
-  }
+  },
+  "description": "Medical Research Collaboration Platform for GSK COPD/Asthma AI Projects",
+  "keywords": [
+    "medical",
+    "collaboration",
+    "research",
+    "ai",
+    "copd",
+    "asthma",
+    "gsk"
+  ]
 }
