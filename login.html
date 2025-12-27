@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - MedCollab Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .login-header {
+            background: linear-gradient(135deg, #3b82f6, #10b981);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+        
+        .dept-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+        
+        .login-content {
+            padding: 40px 30px;
+        }
+        
+        .welcome-text {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+        
+        .instruction {
+            color: #64748b;
+            margin-bottom: 30px;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #475569;
+            font-size: 14px;
+        }
+        
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+        
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+        
+        .role-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .role-option {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+        
+        .role-option:hover {
+            border-color: #3b82f6;
+            background: #f0f9ff;
+        }
+        
+        .role-option.selected {
+            border-color: #3b82f6;
+            background: #f0f9ff;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .role-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .role-title {
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+        
+        .role-desc {
+            font-size: 13px;
+            color: #64748b;
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #3b82f6, #10b981);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-login:active {
+            transform: translateY(0);
+        }
+        
+        .demo-login {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .demo-title {
+            color: #64748b;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .demo-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .demo-btn {
+            padding: 10px 20px;
+            background: #f1f5f9;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            flex: 1;
+            max-width: 150px;
+        }
+        
+        .demo-btn:hover {
+            background: #e2e8f0;
+            border-color: #cbd5e1;
+        }
+        
+        .demo-btn.clinician {
+            background: #f0f9ff;
+            border-color: #bae6fd;
+        }
+        
+        .demo-btn.industry {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+        
+        .footer-note {
+            text-align: center;
+            margin-top: 30px;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+        
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .success-message {
+            background: #dcfce7;
+            color: #166534;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="logo">
+                🏥 MedCollab AI
+            </div>
+            <div class="subtitle">GSK Research Collaboration Platform</div>
+            <div class="dept-badge">Pulmonology Department Innovation</div>
+        </div>
+        
+        <div class="login-content">
+            <div class="welcome-text">Welcome Back</div>
+            <div class="instruction">
+                Enter your details to access the medical research collaboration platform. 
+                Real names are required for professional discussions.
+            </div>
+            
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label class="form-label">Full Name & Credentials</label>
+                    <input type="text" class="form-input" id="name" 
+                           placeholder="Dr. Sarah Chen, MD, Pulmonology" required>
+                    <small style="color: #64748b; font-size: 12px; display: block; margin-top: 5px;">
+                        Use your real name for professional collaboration
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-input" id="email" 
+                           placeholder="name@hospital.edu or name@gsk.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Institution</label>
+                    <input type="text" class="form-input" id="institution" 
+                           placeholder="e.g., Mass General Hospital or GSK" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Your Role</label>
+                    <div class="role-selector">
+                        <div class="role-option" data-role="clinician" onclick="selectRole('clinician')">
+                            <span class="role-icon">👨‍⚕️</span>
+                            <div class="role-title">Clinician</div>
+                            <div class="role-desc">Doctor, Researcher, Healthcare Provider</div>
+                        </div>
+                        <div class="role-option" data-role="industry" onclick="selectRole('industry')">
+                            <span class="role-icon">🏢</span>
+                            <div class="role-title">Industry Partner</div>
+                            <div class="role-desc">GSK, Pharma, Medical Technology</div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="role" value="clinician" required>
+                </div>
+                
+                <button type="submit" class="btn-login" id="loginButton">
+                    Enter Platform
+                </button>
+            </form>
+            
+            <div class="demo-login">
+                <div class="demo-title">Quick Demo Access</div>
+                <div class="demo-buttons">
+                    <button class="demo-btn clinician" onclick="quickLogin('clinician')">
+                        👨‍⚕️ As Clinician
+                    </button>
+                    <button class="demo-btn industry" onclick="quickLogin('industry')">
+                        🏢 As Industry
+                    </button>
+                </div>
+            </div>
+            
+            <div class="footer-note">
+                🔒 Secure platform for medical research collaboration. 
+                All discussions are professional and logged.
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let selectedRole = 'clinician';
+        
+        function selectRole(role) {
+            selectedRole = role;
+            document.getElementById('role').value = role;
+            
+            // Update UI
+            document.querySelectorAll('.role-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            document.querySelector(`.role-option[data-role="${role}"]`).classList.add('selected');
+        }
+        
+        function quickLogin(role) {
+            if (role === 'clinician') {
+                document.getElementById('name').value = 'Dr. Sarah Chen, MD, Pulmonology';
+                document.getElementById('email').value = 'sarah.chen@mgh.harvard.edu';
+                document.getElementById('institution').value = 'Mass General Hospital';
+                selectRole('clinician');
+            } else {
+                document.getElementById('name').value = 'John Doe, Data Protection Officer';
+                document.getElementById('email').value = 'john.doe@gsk.com';
+                document.getElementById('institution').value = 'GSK';
+                selectRole('industry');
+            }
+            
+            // Show success message
+            showMessage('Demo credentials loaded. Click "Enter Platform" to continue.', 'success');
+        }
+        
+        function showMessage(text, type) {
+            const errorEl = document.getElementById('errorMessage');
+            const successEl = document.getElementById('successMessage');
+            
+            if (type === 'error') {
+                errorEl.textContent = text;
+                errorEl.style.display = 'block';
+                successEl.style.display = 'none';
+            } else {
+                successEl.textContent = text;
+                successEl.style.display = 'block';
+                errorEl.style.display = 'none';
+            }
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                errorEl.style.display = 'none';
+                successEl.style.display = 'none';
+            }, 5000);
+        }
+        
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const institution = document.getElementById('institution').value.trim();
+            const role = document.getElementById('role').value;
+            
+            if (!name) {
+                showMessage('Please enter your name and credentials', 'error');
+                return;
+            }
+            
+            if (!email) {
+                showMessage('Please enter your email address', 'error');
+                return;
+            }
+            
+            if (!institution) {
+                showMessage('Please enter your institution', 'error');
+                return;
+            }
+            
+            // Disable button and show loading
+            const loginBtn = document.getElementById('loginButton');
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = 'Entering Platform...';
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, role, institution })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Save user to localStorage
+                    localStorage.setItem('medcollab_user', JSON.stringify({
+                        id: data.user.id,
+                        name: data.user.name,
+                        role: data.user.role,
+                        institution: data.user.institution
+                    }));
+                    
+                    showMessage(`Welcome ${data.user.name}! Redirecting...`, 'success');
+                    
+                    // Redirect to main platform after 1 second
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 1000);
+                } else {
+                    showMessage(data.error || 'Login failed', 'error');
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = 'Enter Platform';
+                }
+            } catch (error) {
+                showMessage('Network error. Please try again.', 'error');
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = 'Enter Platform';
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Select clinician by default
+            selectRole('clinician');
+            
+            // Check if already logged in
+            const savedUser = localStorage.getItem('medcollab_user');
+            if (savedUser) {
+                try {
+                    const user = JSON.parse(savedUser);
+                    document.getElementById('name').value = user.name || '';
+                    document.getElementById('institution').value = user.institution || '';
+                    selectRole(user.role || 'clinician');
+                    showMessage(`Welcome back ${user.name}! You can login again or go directly to <a href="/" style="color: #166534; font-weight: bold;">platform</a>.`, 'success');
+                } catch (e) {
+                    // Clear invalid data
+                    localStorage.removeItem('medcollab_user');
+                }
+            }
+            
+            // Setup form submission
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+        });
+    </script>
+</body>
+</html>
