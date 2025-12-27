@@ -1,0 +1,133 @@
+{
+  "projects": {
+    "gsk-copd-001": {
+      "id": "gsk-copd-001",
+      "title": "AI-Driven Treatable Traits in COPD",
+      "description": "Machine learning identification of treatable traits in COPD patients for personalized intervention. This project aims to develop an AI model that can predict which COPD patients will respond best to specific treatments based on their clinical characteristics.",
+      "status": "active",
+      "phase": "Phase 2",
+      "priority": "high",
+      "tags": ["COPD", "AI", "Treatable-Traits", "GSK", "Clinical", "Machine Learning"],
+      "lead": "Dr. Sarah Chen, MD, Pulmonology",
+      "team": ["clinician1", "researcher2", "data-scientist3"],
+      "institutions": ["GSK", "Mass General Hospital"],
+      "startDate": "2024-01-15",
+      "endDate": "2024-12-31",
+      "milestones": [
+        {
+          "id": "m1",
+          "title": "Data Collection Complete",
+          "status": "completed",
+          "date": "2024-02-28"
+        },
+        {
+          "id": "m2",
+          "title": "AI Model V1",
+          "status": "in-progress",
+          "date": "2024-04-15"
+        },
+        {
+          "id": "m3",
+          "title": "Clinical Validation",
+          "status": "pending",
+          "date": "2024-08-30"
+        }
+      ],
+      "documents": [],
+      "createdAt": "2024-01-15T00:00:00.000Z",
+      "updatedAt": "2024-03-20T10:30:00.000Z",
+      "discussionCount": 3
+    },
+    "gsk-asthma-002": {
+      "id": "gsk-asthma-002",
+      "title": "Asthma Exacerbation Prediction Model",
+      "description": "Deep learning model to predict asthma exacerbations using EHR data and patient-reported outcomes. The goal is to identify patients at high risk of exacerbation 2-4 weeks in advance.",
+      "status": "planning",
+      "phase": "Phase 1",
+      "priority": "medium",
+      "tags": ["Asthma", "Prediction", "Deep-Learning", "GSK", "EHR", "Clinical"],
+      "lead": "Dr. James Wilson, Clinical Researcher",
+      "team": [],
+      "institutions": ["GSK", "University Hospital"],
+      "startDate": "2024-03-01",
+      "endDate": "2024-11-30",
+      "createdAt": "2024-03-01T00:00:00.000Z",
+      "updatedAt": "2024-03-01T00:00:00.000Z",
+      "discussionCount": 1
+    }
+  },
+  
+  "discussions": {
+    "disc-copd-001": {
+      "id": "disc-copd-001",
+      "projectId": "gsk-copd-001",
+      "title": "Patient Privacy Concerns in Data Sharing",
+      "content": "I have concerns about how patient data will be anonymized and shared between institutions. We need clear protocols before proceeding.",
+      "author": "Dr. Sarah Chen, MD, Pulmonology",
+      "highlights": "patient safety, data privacy, ethical considerations",
+      "upvotes": 15,
+      "downvotes": 2,
+      "votes": {
+        "dr-sarah-chen": "up",
+        "clinician1": "up",
+        "john-doe": "up",
+        "dr-wilson": "up"
+      },
+      "comments": [
+        {
+          "id": "c1",
+          "author": "John Doe, GSK Data Protection Officer",
+          "content": "We follow GDPR and HIPAA standards. All data is pseudonymized before sharing.",
+          "date": "2024-01-16T10:30:00.000Z"
+        },
+        {
+          "id": "c2",
+          "author": "Dr. James Wilson, Clinical Researcher",
+          "content": "Could we implement additional encryption for sensitive health metrics?",
+          "date": "2024-01-16T14:20:00.000Z"
+        }
+      ],
+      "createdAt": "2024-01-15T09:00:00.000Z"
+    }
+  },
+  
+  "users": {
+    "dr-sarah-chen": {
+      "id": "dr-sarah-chen",
+      "name": "Dr. Sarah Chen, MD",
+      "role": "clinician",
+      "specialty": "Pulmonology",
+      "institution": "Mass General Hospital",
+      "email": "sarah.chen@mgh.harvard.edu",
+      "projects": ["gsk-copd-001"],
+      "status": "active",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    },
+    "john-doe": {
+      "id": "john-doe",
+      "name": "John Doe",
+      "role": "industry",
+      "title": "GSK Data Protection Officer",
+      "institution": "GSK",
+      "email": "john.doe@gsk.com",
+      "projects": ["gsk-copd-001"],
+      "status": "active",
+      "createdAt": "2024-01-02T00:00:00.000Z"
+    }
+  },
+  
+  "analytics": {
+    "totalVotes": 35,
+    "consensusRate": 78,
+    "topDiscussions": ["disc-copd-001"],
+    "activeCollaborators": 3
+  },
+  
+  "config": {
+    "institution": "GSK Research Collaboration",
+    "theme": "medical",
+    "privacyLevel": "high",
+    "votingEnabled": true,
+    "requireRealNames": true
+  }
+}
