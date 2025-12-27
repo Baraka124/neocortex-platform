@@ -1,732 +1,340 @@
-import express from 'express';
-import fs from 'fs/promises';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const app = express();
-app.use(express.json());
-app.use(express.static('.'));
-
-const DATA_FILE = path.join(__dirname, 'research.json');
-
-// Generate unique IDs
-function generateId(prefix = 'proj') {
-    return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-}
-
-// Initialize medical research data
-async function initData() {
-    try {
-        await fs.access(DATA_FILE);
-        console.log('📁 Research database loaded');
-        return true;
-    } catch {
-        console.log('📁 Creating medical research database...');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏥 MedCollab - GSK Research</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background: #f0f2f5; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .logo { font-size: 24px; font-weight: bold; color: #1a73e8; }
+        .btn { padding: 10px 20px; background: #1a73e8; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .btn:hover { background: #1557b0; }
+        .grid { display: grid; grid-template-columns: 250px 1fr; gap: 20px; }
+        .sidebar { background: white; padding: 20px; border-radius: 10px; height: fit-content; }
+        .main { background: white; padding: 20px; border-radius: 10px; }
+        .project-card { border: 1px solid #ddd; padding: 20px; margin-bottom: 15px; border-radius: 8px; cursor: pointer; }
+        .project-card:hover { border-color: #1a73e8; }
+        .project-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; color: #1a73e8; }
+        .project-status { display: inline-block; padding: 5px 10px; border-radius: 15px; font-size: 12px; margin-right: 10px; }
+        .active { background: #d4edda; color: #155724; }
+        .planning { background: #fff3cd; color: #856404; }
+        .tag { display: inline-block; background: #e8f4fd; color: #1a73e8; padding: 4px 8px; border-radius: 12px; font-size: 12px; margin-right: 5px; margin-bottom: 5px; }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
+        .form-group { margin-bottom: 15px; }
+        .form-input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .loading { text-align: center; padding: 40px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🏥 MedCollab AI</div>
+            <button class="btn" onclick="openModal('createProjectModal')">+ New Project</button>
+        </div>
         
-        const initialData = {
-            // Core GSK Projects
-            projects: {
-                "gsk-copd-001": {
-                    id: "gsk-copd-001",
-                    title: "AI-Driven Treatable Traits in COPD",
-                    description: "Machine learning identification of treatable traits in COPD patients for personalized intervention",
-                    status: "active",
-                    phase: "Phase 2",
-                    priority: "high",
-                    tags: ["COPD", "AI", "Treatable-Traits", "GSK", "Clinical"],
-                    lead: "Dr. Baraka",
-                    team: ["clinician1", "researcher2", "data-scientist3"],
-                    institutions: ["GSK", "University-Hospital"],
-                    startDate: "2024-01-15",
-                    endDate: "2024-12-31",
-                    budget: "$500,000",
-                    milestones: [
-                        { id: "m1", title: "Data Collection Complete", status: "completed", date: "2024-02-28" },
-                        { id: "m2", title: "AI Model V1", status: "in-progress", date: "2024-04-15" },
-                        { id: "m3", title: "Clinical Validation", status: "pending", date: "2024-08-30" }
-                    ],
-                    documents: [
-                        { id: "d1", title: "Protocol v2.1", type: "protocol", url: "#", uploaded: "2024-01-20" },
-                        { id: "d2", title: "Ethics Approval", type: "approval", url: "#", uploaded: "2024-01-25" }
-                    ],
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                },
-                "gsk-asthma-002": {
-                    id: "gsk-asthma-002",
-                    title: "Asthma Exacerbation Prediction Model",
-                    description: "Deep learning model to predict asthma exacerbations using EHR data",
-                    status: "planning",
-                    phase: "Phase 1",
-                    priority: "medium",
-                    tags: ["Asthma", "Prediction", "Deep-Learning", "GSK", "EHR"],
-                    lead: "Dr. Smith",
-                    team: [],
-                    institutions: ["GSK"],
-                    startDate: "2024-03-01",
-                    endDate: "2024-11-30",
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                }
-            },
+        <div class="grid">
+            <div class="sidebar">
+                <h3 style="margin-bottom: 15px;">🔍 Filters</h3>
+                <div style="margin-bottom: 20px;">
+                    <div style="font-weight: bold; margin-bottom: 5px;">Status</div>
+                    <div><label><input type="checkbox" onchange="filterProjects()" id="filterActive"> Active</label></div>
+                    <div><label><input type="checkbox" onchange="filterProjects()" id="filterPlanning"> Planning</label></div>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <div style="font-weight: bold; margin-bottom: 5px;">Tags</div>
+                    <div><label><input type="checkbox" onchange="filterProjects()" id="filterCOPD"> COPD</label></div>
+                    <div><label><input type="checkbox" onchange="filterProjects()" id="filterAsthma"> Asthma</label></div>
+                    <div><label><input type="checkbox" onchange="filterProjects()" id="filterAI"> AI/ML</label></div>
+                </div>
+                <button class="btn" style="width: 100%; margin-top: 10px;" onclick="loadProjects()">Refresh</button>
+            </div>
             
-            // Research Discussions & Notes
-            discussions: {
-                "disc-001": {
-                    id: "disc-001",
-                    projectId: "gsk-copd-001",
-                    title: "Defining Treatable Traits Criteria",
-                    content: "Discussion about which traits should be considered 'treatable' in our model...",
-                    author: "Dr. Baraka",
-                    type: "clinical",
-                    tags: ["criteria", "definition", "clinical"],
-                    comments: [
-                        { id: "c1", author: "clinician1", content: "Should we include eosinophil count?", date: "2024-01-16" },
-                        { id: "c2", author: "researcher2", content: "Yes, plus FeNO levels", date: "2024-01-16" }
-                    ],
-                    createdAt: "2024-01-15"
+            <div class="main">
+                <h2 style="margin-bottom: 20px;">GSK Research Projects</h2>
+                <div id="projectsContainer">
+                    <div class="loading">Loading projects...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Create Project Modal -->
+    <div class="modal" id="createProjectModal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 20px;">Create New Project</h2>
+            <form onsubmit="createProject(event)">
+                <div class="form-group">
+                    <label>Project Title</label>
+                    <input type="text" class="form-input" id="projectTitle" placeholder="e.g., COPD AI Model" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea class="form-input" id="projectDescription" rows="4" placeholder="Describe the project..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Your Name</label>
+                    <input type="text" class="form-input" id="projectLead" placeholder="Dr. Name">
+                </div>
+                <div class="form-group">
+                    <label>Tags (comma separated)</label>
+                    <input type="text" class="form-input" id="projectTags" placeholder="COPD, AI, Clinical">
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="button" class="btn" onclick="closeModal('createProjectModal')" style="background: #6c757d;">Cancel</button>
+                    <button type="submit" class="btn">Create Project</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Create Discussion Modal -->
+    <div class="modal" id="createDiscussionModal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 20px;">Start Discussion</h2>
+            <form onsubmit="createDiscussion(event)">
+                <input type="hidden" id="discussionProjectId">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" class="form-input" id="discussionTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Your Comment</label>
+                    <textarea class="form-input" id="discussionContent" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Your Name</label>
+                    <input type="text" class="form-input" id="discussionAuthor" placeholder="Dr. Name">
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="button" class="btn" onclick="closeModal('createDiscussionModal')" style="background: #6c757d;">Cancel</button>
+                    <button type="submit" class="btn">Post Discussion</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = window.location.origin;
+        let allProjects = [];
+        
+        async function loadProjects() {
+            try {
+                const response = await fetch(`${API_BASE}/api/projects`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    allProjects = data.projects;
+                    renderProjects(allProjects);
                 }
-            },
-            
-            // Team Members
-            members: {
-                "dr-baraka": {
-                    id: "dr-baraka",
-                    name: "Dr. Baraka",
-                    role: "Principal Investigator",
-                    specialty: "Pulmonology",
-                    institution: "University-Hospital",
-                    email: "baraka@hospital.edu",
-                    projects: ["gsk-copd-001"],
-                    status: "active"
-                },
-                "clinician1": {
-                    id: "clinician1",
-                    name: "Dr. Jane Smith",
-                    role: "Clinical Lead",
-                    specialty: "Respiratory Medicine",
-                    institution: "GSK",
-                    email: "j.smith@gsk.com",
-                    projects: ["gsk-copd-001"],
-                    status: "active"
-                }
-            },
-            
-            // AI Models & Datasets
-            models: {
-                "model-001": {
-                    id: "model-001",
-                    name: "COPD Trait Classifier v1",
-                    projectId: "gsk-copd-001",
-                    type: "classification",
-                    framework: "PyTorch",
-                    accuracy: "0.89",
-                    status: "training",
-                    dataset: "copd-ehr-2024",
-                    createdAt: "2024-02-01"
-                }
-            },
-            
-            // Platform Config
-            config: {
-                institution: "GSK Research Collaboration",
-                theme: "medical",
-                privacyLevel: "high",
-                notificationSettings: {
-                    emailAlerts: true,
-                    milestoneUpdates: true,
-                    discussionReplies: true
-                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('projectsContainer').innerHTML = '<div class="loading">Error loading projects</div>';
             }
-        };
-        
-        await fs.writeFile(DATA_FILE, JSON.stringify(initialData, null, 2));
-        console.log('✅ Medical research database created');
-        return true;
-    }
-}
-
-// ========== API ENDPOINTS ==========
-
-// 1. Get all projects
-app.get('/api/projects', async (req, res) => {
-    try {
-        console.log('📨 GET /api/projects called');
-        const { status, tag, lead, institution } = req.query;
-        
-        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
-        
-        let projects = Object.values(data.projects);
-        console.log(`📊 Found ${projects.length} total posts`);
-        
-        // Filtering
-        if (author) {
-            projects = projects.filter(p => p.author === author);
-            console.log(`🔍 Filtered by author "${author}": ${projects.length} posts`);
-        }
-        if (tag) {
-            projects = projects.filter(p => p.tags?.includes(tag));
-            console.log(`🔍 Filtered by tag "${tag}": ${projects.length} posts`);
-        }
-        if (status) {
-            projects = projects.filter(p => p.status === status);
-            console.log(`🔍 Filtered by status "${status}": ${projects.length} posts`);
-        }
-        if (search) {
-            const query = search.toLowerCase();
-            projects = projects.filter(p => 
-                p.title.toLowerCase().includes(query) || 
-                p.content.toLowerCase().includes(query)
-            );
-            console.log(`🔍 Search "${search}": ${projects.length} posts`);
         }
         
-        // Sort by priority and date
-        projects.sort((a, b) => {
-            const priorityOrder = { high: 1, medium: 2, low: 3 };
-            return priorityOrder[a.priority] - priorityOrder[b.priority] ||
-                   new Date(b.updatedAt) - new Date(a.updatedAt);
-        });
-        
-        res.json({ 
-            success: true, 
-            projects,
-            count: projects.length,
-            timestamp: new Date().toISOString()
-        });
-        
-    } catch (error) {
-        console.error('❌ Error in /api/projects:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: error.message
-        });
-    }
-});
-
-// 2. Get single project with all details
-app.get('/api/projects/:id', async (req, res) => {
-    try {
-        console.log(`📨 GET /api/projects/${req.params.id}`);
-        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
-        const project = data.projects[req.params.id];
-        
-        if (!project) {
-            console.log(`❌ Project ${req.params.id} not found`);
-            return res.status(404).json({ success: false, error: 'Project not found' });
-        }
-        
-        // Get related discussions
-        const discussions = Object.values(data.discussions)
-            .filter(d => d.projectId === req.params.id);
-        
-        // Get team details
-        const teamDetails = project.team.map(memberId => data.members[memberId] || null);
-        
-        // Get related models
-        const models = Object.values(data.models)
-            .filter(m => m.projectId === req.params.id);
-        
-        res.json({
-            success: true,
-            project,
-            discussions,
-            team: teamDetails,
-            models,
-            analytics: {
-                discussionCount: discussions.length,
-                teamSize: project.team.length,
-                milestoneProgress: project.milestones?.filter(m => m.status === 'completed').length || 0
+        function renderProjects(projects) {
+            const container = document.getElementById('projectsContainer');
+            
+            if (!projects.length) {
+                container.innerHTML = '<div class="loading">No projects found</div>';
+                return;
             }
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// 3. Create new project (for mini-projects within GSK package)
-app.post('/api/projects', async (req, res) => {
-    try {
-        console.log('📨 POST /api/projects called');
-        const { title, description, lead, tags, type } = req.body;
-        
-        console.log('📝 Creating project:', { title, descriptionLength: description?.length });
-        
-        if (!title || !description) {
-            console.log('❌ Missing title or description');
-            return res.status(400).json({ 
-                success: false, 
-                error: 'Title and description are required' 
-            });
+            
+            container.innerHTML = projects.map(project => `
+                <div class="project-card" onclick="viewProject('${project.id}')">
+                    <div class="project-title">${escapeHtml(project.title)}</div>
+                    <div style="margin-bottom: 10px;">
+                        <span class="project-status ${project.status}">${project.status}</span>
+                        <span style="color: #666; font-size: 14px;">${project.phase}</span>
+                    </div>
+                    <p style="color: #555; margin-bottom: 10px; font-size: 14px;">
+                        ${escapeHtml(project.description.substring(0, 150))}...
+                    </p>
+                    <div style="margin-bottom: 10px;">
+                        ${(project.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
+                    <div style="font-size: 13px; color: #777;">
+                        Lead: ${escapeHtml(project.lead)} • Started: ${formatDate(project.startDate)}
+                    </div>
+                </div>
+            `).join('');
         }
         
-        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
-        
-        // Generate unique ID
-        const id = generateId('gsk');
-        console.log(`🆔 Generated ID: ${id}`);
-        
-        const newProject = {
-            id,
-            title: title.trim(),
-            description: description.trim(),
-            status: "planning",
-            phase: "Phase 1",
-            priority: "medium",
-            tags: [...(tags || []), "GSK", type || "mini-project"],
-            lead: lead || "pending",
-            team: [],
-            institutions: ["GSK"],
-            startDate: new Date().toISOString().split('T')[0],
-            milestones: [],
-            documents: [],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        };
-        
-        // Add to data (unique key = id)
-        data.projects[id] = newProject;
-        
-        await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
-        
-        console.log(`✅ Project created: ${id} by ${newProject.lead}`);
-        
-        res.json({
-            success: true,
-            message: 'Project created successfully!',
-            project: newProject,
-            id,
-            timestamp: new Date().toISOString()
-        });
-        
-    } catch (error) {
-        console.error('❌ Error creating project:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: error.message,
-            details: 'Failed to create project. Please try again.'
-        });
-    }
-});
-
-// 4. Add team member to project
-app.post('/api/projects/:id/team', async (req, res) => {
-    try {
-        console.log(`📨 POST /api/projects/${req.params.id}/team`);
-        const { memberId, role } = req.body;
-        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
-        const project = data.projects[req.params.id];
-        
-        if (!project) {
-            console.log(`❌ Project ${req.params.id} not found`);
-            return res.status(404).json({ success: false, error: 'Project not found' });
+        function filterProjects() {
+            const active = document.getElementById('filterActive').checked;
+            const planning = document.getElementById('filterPlanning').checked;
+            const copd = document.getElementById('filterCOPD').checked;
+            const asthma = document.getElementById('filterAsthma').checked;
+            const ai = document.getElementById('filterAI').checked;
+            
+            let filtered = allProjects;
+            
+            if (active || planning) {
+                filtered = filtered.filter(p => 
+                    (active && p.status === 'active') || 
+                    (planning && p.status === 'planning')
+                );
+            }
+            
+            if (copd || asthma || ai) {
+                filtered = filtered.filter(p => {
+                    const tags = p.tags || [];
+                    return (copd && tags.includes('COPD')) ||
+                           (asthma && tags.includes('Asthma')) ||
+                           (ai && (tags.includes('AI') || tags.includes('ML')));
+                });
+            }
+            
+            renderProjects(filtered);
         }
         
-        // Create member if doesn't exist
-        if (!data.members[memberId]) {
-            data.members[memberId] = {
-                id: memberId,
-                name: memberId,
-                role: role || "Collaborator",
-                specialty: "To be specified",
-                institution: "GSK Partner",
-                projects: [req.params.id],
-                status: "active"
+        async function createProject(e) {
+            e.preventDefault();
+            
+            const project = {
+                title: document.getElementById('projectTitle').value,
+                description: document.getElementById('projectDescription').value,
+                lead: document.getElementById('projectLead').value || 'Anonymous',
+                tags: document.getElementById('projectTags').value.split(',').map(t => t.trim()).filter(t => t)
             };
-        } else {
-            // Add project to member's list
-            if (!data.members[memberId].projects.includes(req.params.id)) {
-                data.members[memberId].projects.push(req.params.id);
-            }
-        }
-        
-        // Add member to project
-        if (!project.team.includes(memberId)) {
-            project.team.push(memberId);
-            project.updatedAt = new Date().toISOString();
-        }
-        
-        await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
-        
-        console.log(`✅ Team member ${memberId} added to project ${req.params.id}`);
-        
-        res.json({
-            success: true,
-            message: 'Team member added',
-            team: project.team,
-            member: data.members[memberId]
-        });
-    } catch (error) {
-        console.error(`❌ Error adding team member to project ${req.params.id}:`, error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// 5. Create research discussion
-app.post('/api/discussions', async (req, res) => {
-    try {
-        const { projectId, title, content, author, type, tags } = req.body;
-        
-        console.log(`📨 POST /api/discussions for project ${projectId}`);
-        
-        if (!projectId || !title || !content) {
-            console.log('❌ Missing required fields for discussion');
-            return res.status(400).json({ 
-                success: false, 
-                error: 'Project, title and content are required' 
-            });
-        }
-        
-        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
-        const id = generateId('disc');
-        
-        const discussion = {
-            id,
-            projectId,
-            title: title.trim(),
-            content: content.trim(),
-            author: author || "anonymous",
-            type: type || "general",
-            tags: tags || [],
-            comments: [],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        };
-        
-        data.discussions[id] = discussion;
-        await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
-        
-        // Update project timestamp
-        if (data.projects[projectId]) {
-            data.projects[projectId].updatedAt = new Date().toISOString();
-            await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
-        }
-        
-        console.log(`✅ Discussion created: ${id} in project ${projectId}`);
-        
-        res.json({
-            success: true,
-            message: 'Discussion created',
-            discussion
-        });
-    } catch (error) {
-        console.error('❌ Error creating discussion:', error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// 6. Add comment to discussion
-app.post('/api/discussions/:id/comments', async (req, res) => {
-    try {
-        console.log(`📨 POST /api/discussions/${req.params.id}/comments`);
-        const { author, content } = req.body;
-        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
-        const discussion = data.discussions[req.params.id];
-        
-        if (!discussion) {
-            console.log(`❌ Discussion ${req.params.id} not found`);
-            return res.status(404).json({ success: false, error: 'Discussion not found' });
-        }
-        
-        const comment = {
-            id: `comment-${Date.now()}`,
-            author: author || "anonymous",
-            content: content.trim(),
-            date: new Date().toISOString()
-        };
-        
-        discussion.comments.push(comment);
-        discussion.updatedAt = new Date().toISOString();
-        
-        // Update project timestamp
-        if (data.projects[discussion.projectId]) {
-            data.projects[discussion.projectId].updatedAt = new Date().toISOString();
-        }
-        
-        await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
-        
-        console.log(`💬 Comment added to discussion ${req.params.id} by ${comment.author}`);
-        
-        res.json({
-            success: true,
-            message: 'Comment added',
-            comment
-        });
-    } catch (error) {
-        console.error(`❌ Error adding comment to discussion ${req.params.id}:`, error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// 7. Add milestone to project
-app.post('/api/projects/:id/milestones', async (req, res) => {
-    try {
-        console.log(`📨 POST /api/projects/${req.params.id}/milestones`);
-        const { title, dueDate, assignee } = req.body;
-        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
-        const project = data.projects[req.params.id];
-        
-        if (!project) {
-            console.log(`❌ Project ${req.params.id} not found`);
-            return res.status(404).json({ success: false, error: 'Project not found' });
-        }
-        
-        const milestone = {
-            id: `m${(project.milestones?.length || 0) + 1}`,
-            title: title.trim(),
-            status: "pending",
-            dueDate,
-            assignee,
-            createdAt: new Date().toISOString()
-        };
-        
-        if (!project.milestones) project.milestones = [];
-        project.milestones.push(milestone);
-        project.updatedAt = new Date().toISOString();
-        
-        await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
-        
-        console.log(`✅ Milestone added to project ${req.params.id}: ${title}`);
-        
-        res.json({
-            success: true,
-            message: 'Milestone added',
-            milestone
-        });
-    } catch (error) {
-        console.error(`❌ Error adding milestone to project ${req.params.id}:`, error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// 8. Update milestone status
-app.put('/api/projects/:projectId/milestones/:milestoneId', async (req, res) => {
-    try {
-        console.log(`📨 PUT /api/projects/${req.params.projectId}/milestones/${req.params.milestoneId}`);
-        const { status, notes } = req.body;
-        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
-        const project = data.projects[req.params.projectId];
-        
-        if (!project) {
-            console.log(`❌ Project ${req.params.projectId} not found`);
-            return res.status(404).json({ success: false, error: 'Project not found' });
-        }
-        
-        const milestone = project.milestones?.find(m => m.id === req.params.milestoneId);
-        if (!milestone) {
-            console.log(`❌ Milestone ${req.params.milestoneId} not found in project ${req.params.projectId}`);
-            return res.status(404).json({ success: false, error: 'Milestone not found' });
-        }
-        
-        milestone.status = status || milestone.status;
-        milestone.notes = notes;
-        milestone.updatedAt = new Date().toISOString();
-        project.updatedAt = new Date().toISOString();
-        
-        await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
-        
-        console.log(`✅ Milestone ${req.params.milestoneId} updated to status: ${status}`);
-        
-        res.json({
-            success: true,
-            message: 'Milestone updated',
-            milestone
-        });
-    } catch (error) {
-        console.error(`❌ Error updating milestone ${req.params.milestoneId}:`, error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// 9. Get platform analytics
-app.get('/api/analytics', async (req, res) => {
-    try {
-        console.log('📨 GET /api/analytics');
-        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
-        const projects = Object.values(data.projects);
-        const discussions = Object.values(data.discussions);
-        const members = Object.values(data.members);
-        
-        const analytics = {
-            projects: {
-                total: projects.length,
-                active: projects.filter(p => p.status === 'active').length,
-                planning: projects.filter(p => p.status === 'planning').length,
-                completed: projects.filter(p => p.status === 'completed').length,
-                byPhase: {
-                    phase1: projects.filter(p => p.phase === 'Phase 1').length,
-                    phase2: projects.filter(p => p.phase === 'Phase 2').length,
-                    phase3: projects.filter(p => p.phase === 'Phase 3').length
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/projects`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(project)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    closeModal('createProjectModal');
+                    loadProjects();
+                    alert('Project created successfully!');
+                    // Clear form
+                    e.target.reset();
+                } else {
+                    alert('Error: ' + data.error);
                 }
-            },
-            collaboration: {
-                totalMembers: members.length,
-                activeDiscussions: discussions.length,
-                totalComments: discussions.reduce((sum, d) => sum + (d.comments?.length || 0), 0),
-                institutions: [...new Set(members.map(m => m.institution))]
-            },
-            timeline: {
-                recentProjects: projects
-                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                    .slice(0, 5)
-                    .map(p => ({ id: p.id, title: p.title, status: p.status })),
-                upcomingMilestones: projects
-                    .flatMap(p => p.milestones?.map(m => ({ ...m, projectId: p.id, projectTitle: p.title })) || [])
-                    .filter(m => m.status === 'pending')
-                    .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-                    .slice(0, 5)
+            } catch (error) {
+                alert('Failed to create project');
             }
-        };
-        
-        console.log(`📊 Analytics: ${analytics.projects.total} projects, ${analytics.collaboration.totalMembers} members`);
-        
-        res.json({ 
-            success: true, 
-            analytics,
-            timestamp: new Date().toISOString()
-        });
-        
-    } catch (error) {
-        console.error('❌ Error getting analytics:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: error.message 
-        });
-    }
-});
-
-// 10. Get all discussions
-app.get('/api/discussions', async (req, res) => {
-    try {
-        console.log('📨 GET /api/discussions');
-        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
-        const discussions = Object.values(data.discussions);
-        
-        // Sort by date (newest first)
-        discussions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        
-        res.json({
-            success: true,
-            discussions,
-            count: discussions.length,
-            timestamp: new Date().toISOString()
-        });
-    } catch (error) {
-        console.error('❌ Error getting discussions:', error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// 11. Search across everything
-app.get('/api/search', async (req, res) => {
-    try {
-        const { q } = req.query;
-        console.log(`🔍 Search request: ${q}`);
-        
-        if (!q) {
-            return res.json({ success: true, results: [] });
         }
         
-        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
-        const query = q.toLowerCase();
+        function openDiscussionModal(projectId) {
+            document.getElementById('discussionProjectId').value = projectId;
+            document.getElementById('createDiscussionModal').classList.add('active');
+        }
         
-        const results = {
-            projects: Object.values(data.projects).filter(p => 
-                p.title.toLowerCase().includes(query) || 
-                p.description.toLowerCase().includes(query) ||
-                p.tags?.some(tag => tag.toLowerCase().includes(query))
-            ),
-            discussions: Object.values(data.discussions).filter(d => 
-                d.title.toLowerCase().includes(query) || 
-                d.content.toLowerCase().includes(query)
-            ),
-            members: Object.values(data.members).filter(m => 
-                m.name.toLowerCase().includes(query) || 
-                m.specialty.toLowerCase().includes(query)
-            )
-        };
+        async function createDiscussion(e) {
+            e.preventDefault();
+            
+            const discussion = {
+                projectId: document.getElementById('discussionProjectId').value,
+                title: document.getElementById('discussionTitle').value,
+                content: document.getElementById('discussionContent').value,
+                author: document.getElementById('discussionAuthor').value || 'Anonymous'
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/discussions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(discussion)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    closeModal('createDiscussionModal');
+                    alert('Discussion started!');
+                    e.target.reset();
+                }
+            } catch (error) {
+                alert('Failed to create discussion');
+            }
+        }
         
-        console.log(`🔍 Search results: ${results.projects.length} projects, ${results.discussions.length} discussions`);
+        async function viewProject(projectId) {
+            try {
+                const response = await fetch(`${API_BASE}/api/projects/${projectId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const project = data.project;
+                    const discussions = data.discussions;
+                    
+                    const modal = document.createElement('div');
+                    modal.className = 'modal active';
+                    modal.innerHTML = `
+                        <div class="modal-content">
+                            <h2>${escapeHtml(project.title)}</h2>
+                            <div style="margin: 15px 0;">
+                                <span class="project-status ${project.status}">${project.status}</span>
+                                <span class="tag">${project.phase}</span>
+                            </div>
+                            <p style="margin: 15px 0; line-height: 1.6;">${escapeHtml(project.description)}</p>
+                            <div style="margin: 15px 0;">
+                                <strong>Tags:</strong> ${(project.tags || []).map(t => `<span class="tag">${t}</span>`).join('')}
+                            </div>
+                            <div style="margin: 15px 0;">
+                                <strong>Lead:</strong> ${escapeHtml(project.lead)}<br>
+                                <strong>Team:</strong> ${project.team.length} members<br>
+                                <strong>Started:</strong> ${formatDate(project.startDate)}
+                            </div>
+                            
+                            <h3 style="margin: 20px 0 10px 0;">Discussions (${discussions.length})</h3>
+                            ${discussions.length ? discussions.map(d => `
+                                <div style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px;">
+                                    <div style="font-weight: bold; margin-bottom: 5px;">${escapeHtml(d.title)}</div>
+                                    <div style="font-size: 13px; color: #666; margin-bottom: 10px;">
+                                        By ${escapeHtml(d.author)} • ${formatDate(d.createdAt)}
+                                    </div>
+                                    <p style="font-size: 14px;">${escapeHtml(d.content)}</p>
+                                </div>
+                            `).join('') : '<p>No discussions yet</p>'}
+                            
+                            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                                <button class="btn" onclick="openDiscussionModal('${projectId}')">Start Discussion</button>
+                                <button class="btn" onclick="this.closest('.modal').remove()" style="background: #6c757d;">Close</button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.body.appendChild(modal);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
         
-        res.json({ success: true, query, results });
-    } catch (error) {
-        console.error('❌ Error searching:', error);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// 12. Debug endpoint
-app.get('/api/debug', async (req, res) => {
-    try {
-        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
-        const projects = Object.values(data.projects);
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
         
-        res.json({
-            success: true,
-            fileExists: true,
-            postCount: projects.length,
-            fileSize: JSON.stringify(data).length,
-            sampleProjects: projects.slice(0, 3).map(p => ({
-                id: p.id,
-                title: p.title,
-                lead: p.lead,
-                status: p.status
-            })),
-            serverTime: new Date().toISOString(),
-            nodeVersion: process.version
-        });
-    } catch (error) {
-        res.json({
-            success: false,
-            error: error.message,
-            fileExists: false
-        });
-    }
-});
-
-// 13. Health check
-app.get('/health', (req, res) => {
-    res.json({ 
-        status: '🏥 Medical Collaboration Platform Active',
-        service: 'GSK Research Collaboration',
-        timestamp: new Date().toISOString(),
-        version: '1.0.0',
-        endpoints: [
-            '/api/projects',
-            '/api/discussions', 
-            '/api/analytics',
-            '/api/search',
-            '/health',
-            '/api/debug'
-        ]
-    });
-});
-
-// Initialize and start
-async function startServer() {
-    try {
-        await initData();
-        const PORT = process.env.PORT || 3000;
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
         
-        // Get initial stats
-        const data = JSON.parse(await fs.readFile(DATA_FILE, 'utf-8'));
-        const projectCount = Object.keys(data.projects).length;
-        const memberCount = Object.keys(data.members).length;
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
         
-        app.listen(PORT, () => {
-            console.log(`🏥 MedCollab AI Platform running on port ${PORT}`);
-            console.log(`🔬 GSK Projects: ${projectCount}`);
-            console.log(`👨‍⚕️ Team Members: ${memberCount}`);
-            console.log(`🌐 Health check: http://localhost:${PORT}/health`);
-            console.log(`🔧 Debug: http://localhost:${PORT}/api/debug`);
-        });
-    } catch (error) {
-        console.error('❌ Failed to start server:', error);
-        process.exit(1);
-    }
-}
-
-startServer();
+        function formatDate(dateStr) {
+            if (!dateStr) return 'Unknown';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString();
+        }
+        
+        // Initialize
+        loadProjects();
+    </script>
+</body>
+</html>
