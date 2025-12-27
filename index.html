@@ -3,184 +3,788 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎯 3-File Dynamic Blog</title>
+    <title>🏥 MedCollab AI - GSK Research Platform</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.6; }
-        .dark { background: #0f172a; color: #f1f5f9; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
         
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; margin-bottom: 2rem; border-bottom: 2px solid #e2e8f0; }
-        .dark .header { border-color: #334155; }
-        .logo { font-size: 1.5rem; font-weight: bold; color: #3b82f6; }
+        :root {
+            --medical-blue: #1a73e8;
+            --medical-green: #34a853;
+            --medical-red: #ea4335;
+            --medical-purple: #8e44ad;
+            --bg-light: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #1a1a2e;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --radius: 12px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
         
-        .btn { padding: 0.5rem 1rem; border: 1px solid #e2e8f0; background: white; border-radius: 8px; cursor: pointer; font-size: 0.875rem; }
-        .dark .btn { background: #1e293b; border-color: #334155; color: #f1f5f9; }
-        .btn-primary { background: #3b82f6; color: white; border: none; }
+        .dark-mode {
+            --medical-blue: #4285f4;
+            --medical-green: #0f9d58;
+            --medical-red: #db4437;
+            --medical-purple: #9c27b0;
+            --bg-light: #0f172a;
+            --bg-card: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
         
-        /* Grid Layout */
-        .main-grid { display: grid; grid-template-columns: 1fr 300px; gap: 2rem; }
-        @media (max-width: 768px) { .main-grid { grid-template-columns: 1fr; } }
+        body {
+            background: var(--bg-light);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
         
-        /* Posts */
-        .posts-grid { display: grid; gap: 1.5rem; }
-        .post-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; transition: all 0.3s; }
-        .dark .post-card { background: #1e293b; border-color: #334155; }
-        .post-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .post-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem; }
-        .post-title { font-size: 1.25rem; font-weight: 600; color: #1e293b; }
-        .dark .post-title { color: #f1f5f9; }
-        .post-author { color: #64748b; font-size: 0.875rem; }
-        .post-content { margin: 1rem 0; line-height: 1.7; }
-        .post-footer { display: flex; gap: 1rem; color: #64748b; font-size: 0.875rem; margin-top: 1rem; }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
         
-        /* Editor Modal */
-        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; padding: 20px; overflow-y: auto; }
-        .modal.active { display: block; }
-        .modal-content { max-width: 800px; margin: 2rem auto; background: white; border-radius: 12px; padding: 2rem; }
-        .dark .modal-content { background: #1e293b; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-        .modal-title { font-size: 1.5rem; font-weight: 600; }
-        .modal-close { font-size: 1.5rem; cursor: pointer; padding: 0.5rem; }
+        /* Header */
+        .header {
+            background: var(--bg-card);
+            border-bottom: 2px solid var(--border);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
         
-        .form-group { margin-bottom: 1rem; }
-        .form-label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
-        .form-input { width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem; }
-        .dark .form-input { background: #0f172a; border-color: #334155; color: #f1f5f9; }
-        .form-textarea { width: 100%; min-height: 300px; padding: 1rem; border: 1px solid #e2e8f0; border-radius: 8px; font-family: 'SF Mono', monospace; font-size: 14px; resize: vertical; }
-        .dark .form-textarea { background: #0f172a; border-color: #334155; color: #f1f5f9; }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--medical-blue);
+        }
+        
+        .logo-badge {
+            background: var(--medical-blue);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        
+        .btn:hover {
+            border-color: var(--medical-blue);
+            color: var(--medical-blue);
+        }
+        
+        .btn-primary {
+            background: var(--medical-blue);
+            color: white;
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: #1557b0;
+            color: white;
+        }
+        
+        .btn-success {
+            background: var(--medical-green);
+            color: white;
+            border: none;
+        }
+        
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 24px;
+            margin-top: 24px;
+        }
+        
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
         
         /* Sidebar */
-        .sidebar { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; }
-        .dark .sidebar { background: #1e293b; border-color: #334155; }
-        .sidebar-section { margin-bottom: 2rem; }
-        .sidebar-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; }
+        .sidebar {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 24px;
+            border: 1px solid var(--border);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
         
-        .tag { display: inline-block; background: rgba(59,130,246,0.1); color: #3b82f6; padding: 0.25rem 0.75rem; border-radius: 100px; font-size: 0.75rem; margin: 0.25rem; cursor: pointer; }
-        .tag:hover { background: rgba(59,130,246,0.2); }
+        .sidebar-section {
+            margin-bottom: 32px;
+        }
         
-        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-        .stat { text-align: center; }
-        .stat-value { font-size: 2rem; font-weight: bold; color: #3b82f6; }
-        .stat-label { font-size: 0.875rem; color: #64748b; }
+        .sidebar-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
         
-        /* Markdown Content */
-        .markdown-content h1, .markdown-content h2, .markdown-content h3 { margin: 1.5rem 0 1rem; }
-        .markdown-content p { margin: 1rem 0; }
-        .markdown-content code { background: rgba(0,0,0,0.1); padding: 0.2rem 0.4rem; border-radius: 4px; font-family: 'SF Mono', monospace; }
-        .dark .markdown-content code { background: rgba(255,255,255,0.1); }
-        .markdown-content pre { background: rgba(0,0,0,0.05); padding: 1rem; border-radius: 8px; overflow-x: auto; margin: 1rem 0; }
-        .dark .markdown-content pre { background: rgba(255,255,255,0.05); }
-        .markdown-content blockquote { border-left: 4px solid #3b82f6; padding-left: 1rem; margin: 1rem 0; color: #64748b; }
+        .filter-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .tag {
+            background: rgba(26, 115, 232, 0.1);
+            color: var(--medical-blue);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .tag:hover {
+            background: rgba(26, 115, 232, 0.2);
+        }
+        
+        .tag.active {
+            background: var(--medical-blue);
+            color: white;
+        }
+        
+        .tag-copd { background: rgba(52, 168, 83, 0.1); color: var(--medical-green); }
+        .tag-copd.active { background: var(--medical-green); color: white; }
+        
+        .tag-asthma { background: rgba(234, 67, 53, 0.1); color: var(--medical-red); }
+        .tag-asthma.active { background: var(--medical-red); color: white; }
+        
+        .tag-ai { background: rgba(142, 68, 173, 0.1); color: var(--medical-purple); }
+        .tag-ai.active { background: var(--medical-purple); color: white; }
+        
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--medical-blue);
+            line-height: 1;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+        
+        /* Projects Grid */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .project-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .project-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow);
+            border-color: var(--medical-blue);
+        }
+        
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 16px;
+        }
+        
+        .project-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        
+        .project-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .status-active { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .status-planning { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .status-completed { background: rgba(59, 130, 246, 0.1); color: var(--medical-blue); }
+        
+        .project-description {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .project-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .project-lead {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .modal-body {
+            padding: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--bg-light);
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--medical-blue);
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+        }
+        
+        .form-textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--bg-light);
+            color: var(--text-primary);
+            font-family: 'SF Mono', monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            resize: vertical;
+        }
+        
+        /* Discussion Thread */
+        .discussion-thread {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .discussion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 20px;
+        }
+        
+        .discussion-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        
+        .discussion-meta {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        .discussion-content {
+            color: var(--text-primary);
+            line-height: 1.8;
+            margin-bottom: 24px;
+        }
+        
+        .comments-section {
+            margin-top: 32px;
+            border-top: 1px solid var(--border);
+            padding-top: 24px;
+        }
+        
+        .comment {
+            background: var(--bg-light);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .comment-author {
+            font-weight: 600;
+            color: var(--medical-blue);
+            margin-bottom: 8px;
+        }
+        
+        .comment-date {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            margin-left: 8px;
+        }
+        
+        .comment-content {
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
         
         /* Loading */
-        .loading { text-align: center; padding: 4rem; color: #64748b; }
-        .spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid rgba(59,130,246,0.3); border-radius: 50%; border-top-color: #3b82f6; animation: spin 1s linear infinite; margin-bottom: 1rem; }
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-secondary);
+        }
         
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(26, 115, 232, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--medical-blue);
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
         
-        /* Comments */
-        .comments { margin-top: 2rem; border-top: 1px solid #e2e8f0; padding-top: 1rem; }
-        .dark .comments { border-color: #334155; }
-        .comment { background: rgba(0,0,0,0.03); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
-        .dark .comment { background: rgba(255,255,255,0.05); }
-        .comment-author { font-weight: 600; color: #3b82f6; }
-        .comment-date { color: #64748b; font-size: 0.75rem; }
-        .comment-content { margin: 0.5rem 0; }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 24px;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .tab.active {
+            color: var(--medical-blue);
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--medical-blue);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Utility */
+        .chip {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
+        
+        .priority-high { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+        .priority-medium { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .priority-low { background: rgba(59, 130, 246, 0.1); color: var(--medical-blue); }
+        
+        .phase-badge {
+            background: var(--medical-purple);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+            
+            .controls {
+                justify-content: center;
+            }
+            
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
+    <!-- Add Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Editor Modal -->
-    <div class="modal" id="editorModal">
+    <!-- Create Project Modal -->
+    <div class="modal" id="createProjectModal">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="modal-title">Create New Post ✨</div>
-                <div class="modal-close" onclick="closeEditor()">×</div>
+                <div class="modal-title">🏥 Create New Research Project</div>
+                <button class="btn" onclick="closeModal('createProjectModal')">✕</button>
             </div>
-            
-            <form id="postForm" onsubmit="return false;">
-                <div class="form-group">
-                    <label class="form-label">Your Name</label>
-                    <input type="text" class="form-input" id="postAuthor" placeholder="Enter your name (optional)" />
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Post Title</label>
-                    <input type="text" class="form-input" id="postTitle" placeholder="Enter a catchy title" required />
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Tags (comma separated)</label>
-                    <input type="text" class="form-input" id="postTags" placeholder="blog, web, ideas, technology" />
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Content (Markdown supported)</label>
-                    <textarea class="form-textarea" id="postContent" placeholder="Write your post here... Markdown is supported!
+            <div class="modal-body">
+                <form id="projectForm">
+                    <div class="form-group">
+                        <label class="form-label">Project Title</label>
+                        <input type="text" class="form-input" id="projectTitle" placeholder="e.g., AI-based COPD Phenotyping" required>
+                    </div>
                     
-# Like this
-## And this
-**Bold text** and *italic text*
-- Lists
-- More lists
-`code snippets`
-> Quotes
-[Links](https://example.com)" required></textarea>
-                </div>
-                
-                <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
-                    <button type="button" class="btn" onclick="closeEditor()">Cancel</button>
-                    <button type="submit" class="btn btn-primary" onclick="createPost()">📝 Publish Post</button>
-                </div>
-            </form>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-textarea" id="projectDescription" placeholder="Describe the project objectives, methodology, and expected outcomes..." required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Project Lead</label>
+                        <input type="text" class="form-input" id="projectLead" placeholder="Your name or team lead">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Tags (select relevant)</label>
+                        <div class="filter-tags" id="projectTagsSelect">
+                            <span class="tag tag-copd" onclick="toggleTag(this, 'COPD')">COPD</span>
+                            <span class="tag tag-asthma" onclick="toggleTag(this, 'Asthma')">Asthma</span>
+                            <span class="tag tag-ai" onclick="toggleTag(this, 'AI')">AI/ML</span>
+                            <span class="tag" onclick="toggleTag(this, 'Clinical-Trial')">Clinical Trial</span>
+                            <span class="tag" onclick="toggleTag(this, 'Data-Analysis')">Data Analysis</span>
+                            <span class="tag" onclick="toggleTag(this, 'Treatable-Traits')">Treatable Traits</span>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 32px;">
+                        <button type="button" class="btn" onclick="closeModal('createProjectModal')">Cancel</button>
+                        <button type="submit" class="btn btn-primary" onclick="createProject()">Create Project</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Create Discussion Modal -->
+    <div class="modal" id="createDiscussionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">💬 Start New Discussion</div>
+                <button class="btn" onclick="closeModal('createDiscussionModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="discussionForm">
+                    <div class="form-group">
+                        <label class="form-label">Discussion Title</label>
+                        <input type="text" class="form-input" id="discussionTitle" placeholder="e.g., Ethical considerations for AI in COPD" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Project</label>
+                        <select class="form-input" id="discussionProject" required>
+                            <option value="">Select a project</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Discussion Type</label>
+                        <select class="form-input" id="discussionType">
+                            <option value="clinical">Clinical Discussion</option>
+                            <option value="technical">Technical/ML</option>
+                            <option value="ethics">Ethics & Compliance</option>
+                            <option value="general">General</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Content</label>
+                        <textarea class="form-textarea" id="discussionContent" placeholder="Start the discussion... (Markdown supported)" required></textarea>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 32px;">
+                        <button type="button" class="btn" onclick="closeModal('createDiscussionModal')">Cancel</button>
+                        <button type="submit" class="btn btn-primary" onclick="createDiscussion()">Start Discussion</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Project Details Modal -->
+    <div class="modal" id="projectDetailsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="projectModalTitle"></div>
+                <button class="btn" onclick="closeModal('projectDetailsModal')">✕</button>
+            </div>
+            <div class="modal-body" id="projectModalBody">
+                <!-- Filled dynamically -->
+            </div>
         </div>
     </div>
     
     <!-- Main App -->
-    <div class="container">
-        <div class="header">
-            <div class="logo">🎯 3-File Blog</div>
-            <div style="display: flex; gap: 0.5rem;">
-                <button class="btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
-                <button class="btn btn-primary" onclick="openEditor()">+ New Post</button>
-            </div>
-        </div>
-        
-        <div class="main-grid">
-            <!-- Main Content -->
-            <div>
-                <div id="contentArea">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <p>Loading posts...</p>
-                    </div>
+    <div class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    🏥 MedCollab AI
+                    <span class="logo-badge">GSK Research</span>
+                </div>
+                <div class="controls">
+                    <button class="btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+                    <button class="btn" onclick="loadAnalytics()">📊 Analytics</button>
+                    <button class="btn" onclick="openModal('createDiscussionModal')">💬 Discussion</button>
+                    <button class="btn btn-primary" onclick="openModal('createProjectModal')">
+                        ➕ New Project
+                    </button>
                 </div>
             </div>
-            
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('projects')">📋 Projects</button>
+            <button class="tab" onclick="switchTab('discussions')">💬 Discussions</button>
+            <button class="tab" onclick="switchTab('team')">👥 Team</button>
+            <button class="tab" onclick="switchTab('analytics')">📈 Analytics</button>
+        </div>
+        
+        <!-- Dashboard -->
+        <div class="dashboard-grid">
             <!-- Sidebar -->
             <div class="sidebar">
                 <div class="sidebar-section">
-                    <h3 class="sidebar-title">📊 Live Stats</h3>
-                    <div id="statsArea">
-                        <div class="loading" style="padding: 1rem;">
-                            <div class="spinner"></div>
+                    <div class="sidebar-title">🔍 Quick Filters</div>
+                    <div class="filter-tags">
+                        <span class="tag tag-copd active" onclick="filterByTag('COPD')">COPD</span>
+                        <span class="tag tag-asthma" onclick="filterByTag('Asthma')">Asthma</span>
+                        <span class="tag tag-ai" onclick="filterByTag('AI')">AI/ML</span>
+                        <span class="tag" onclick="filterByTag('Treatable-Traits')">Treatable Traits</span>
+                        <span class="tag" onclick="filterByTag('Clinical-Trial')">Clinical Trial</span>
+                        <span class="tag" onclick="clearFilters()">Clear All</span>
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-title">📊 Live Stats</div>
+                    <div id="quickStats">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value" id="activeProjects">0</div>
+                                <div class="stat-label">Active Projects</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="teamMembers">0</div>
+                                <div class="stat-label">Team Members</div>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
                 <div class="sidebar-section">
-                    <h3 class="sidebar-title">🏷️ Popular Tags</h3>
-                    <div id="tagsArea">
-                        <!-- Tags load here -->
+                    <div class="sidebar-title">🚀 Quick Actions</div>
+                    <div style="display: grid; gap: 10px;">
+                        <button class="btn" onclick="loadProjects()">🔄 Refresh</button>
+                        <button class="btn" onclick="openModal('createProjectModal')">🏥 New Mini-Project</button>
+                        <button class="btn" onclick="openModal('createDiscussionModal')">💬 Clinical Query</button>
+                        <button class="btn" onclick="searchProjects()">🔍 Search All</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Content Area -->
+            <div>
+                <!-- Projects Tab -->
+                <div class="tab-content active" id="projectsTab">
+                    <div id="projectsArea">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Loading GSK projects...</p>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="sidebar-section">
-                    <h3 class="sidebar-title">🔍 Quick Actions</h3>
-                    <div style="display: grid; gap: 0.5rem;">
-                        <button class="btn" onclick="loadPosts()">🔄 Refresh</button>
-                        <button class="btn" onclick="showAllPosts()">📚 View All</button>
-                        <button class="btn" onclick="showMyPosts()">👤 My Posts</button>
+                <!-- Discussions Tab -->
+                <div class="tab-content" id="discussionsTab">
+                    <div id="discussionsArea">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Loading discussions...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Team Tab -->
+                <div class="tab-content" id="teamTab">
+                    <div id="teamArea">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Loading team members...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Analytics Tab -->
+                <div class="tab-content" id="analyticsTab">
+                    <div id="analyticsArea">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Loading analytics...</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -188,338 +792,445 @@
     </div>
     
     <script>
-        // ========== CORE ==========
-        class BlogPlatform {
+        // ========== CORE PLATFORM ==========
+        class MedCollabPlatform {
             constructor() {
                 this.apiBase = window.location.origin;
-                this.currentAuthor = localStorage.getItem('blog-author') || '';
-                this.currentView = 'all';
+                this.currentView = 'projects';
+                this.currentFilters = { tags: ['COPD'] };
+                this.userName = localStorage.getItem('medcollab-user') || 'Clinician';
                 this.init();
             }
             
             async init() {
                 this.loadTheme();
-                await this.loadPosts();
-                await this.loadStats();
-                console.log('🚀 Blog platform ready!');
+                await this.loadProjects();
+                await this.loadQuickStats();
+                await this.populateProjectSelect();
+                console.log('🏥 MedCollab AI Platform initialized');
             }
             
-            async loadPosts(filter = {}) {
+            async loadProjects() {
                 try {
-                    // Build query string
                     const params = new URLSearchParams();
-                    if (filter.author) params.append('author', filter.author);
-                    if (filter.tag) params.append('tag', filter.tag);
-                    if (filter.search) params.append('search', filter.search);
+                    if (this.currentFilters.tags?.length > 0) {
+                        this.currentFilters.tags.forEach(tag => params.append('tag', tag));
+                    }
                     
-                    const response = await fetch(`${this.apiBase}/api/posts?${params}`);
+                    const response = await fetch(`${this.apiBase}/api/projects?${params}`);
                     const data = await response.json();
                     
                     if (data.success) {
-                        this.renderPosts(data.posts);
-                        this.updateTags(data.posts);
+                        this.renderProjects(data.projects);
                     }
                 } catch (error) {
-                    console.error('Error loading posts:', error);
-                    this.showError('Failed to load posts');
+                    console.error('Error loading projects:', error);
+                    this.showError('Failed to load projects');
                 }
             }
             
-            renderPosts(posts) {
-                const container = document.getElementById('contentArea');
+            renderProjects(projects) {
+                const container = document.getElementById('projectsArea');
                 
-                if (!posts || posts.length === 0) {
+                if (!projects || projects.length === 0) {
                     container.innerHTML = `
-                        <div class="post-card">
-                            <h2>No posts yet 😴</h2>
-                            <p>Be the first to create a post!</p>
-                            <button class="btn btn-primary" onclick="openEditor()" style="margin-top: 1rem;">
-                                + Create First Post
+                        <div class="project-card">
+                            <h2 style="margin-bottom: 1rem;">No projects found</h2>
+                            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                                Start by creating your first research project
+                            </p>
+                            <button class="btn btn-primary" onclick="openModal('createProjectModal')">
+                                🏥 Create First Project
                             </button>
                         </div>
                     `;
                     return;
                 }
                 
-                container.innerHTML = posts.map(post => `
-                    <article class="post-card" id="post-${post.id}">
-                        <div class="post-header">
-                            <div>
-                                <h2 class="post-title">${this.escapeHtml(post.title)}</h2>
-                                <div class="post-author">
-                                    By ${this.escapeHtml(post.author)} • ${this.formatDate(post.date)}
-                                    ${post.status === 'pending' ? '⏳ (Pending)' : ''}
+                container.innerHTML = projects.map(project => `
+                    <div class="project-card" onclick="viewProject('${project.id}')">
+                        <div class="project-header">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                                    <h3 class="project-title">${this.escapeHtml(project.title)}</h3>
+                                    <span class="phase-badge">${project.phase || 'Phase 1'}</span>
+                                </div>
+                                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                                    <span class="chip priority-${project.priority || 'medium'}">
+                                        ${(project.priority || 'medium').toUpperCase()}
+                                    </span>
+                                    <span class="project-status status-${project.status || 'planning'}">
+                                        ${project.status || 'Planning'}
+                                    </span>
                                 </div>
                             </div>
-                            <button class="btn" onclick="likePost('${post.id}')">❤️ ${post.likes || 0}</button>
                         </div>
                         
-                        <div class="post-content markdown-content">
-                            ${this.renderMarkdown(post.content.substring(0, 500) + (post.content.length > 500 ? '...' : ''))}
+                        <p class="project-description">
+                            ${this.escapeHtml(project.description.substring(0, 200))}${project.description.length > 200 ? '...' : ''}
+                        </p>
+                        
+                        <div style="margin-bottom: 16px;">
+                            ${(project.tags || []).slice(0, 4).map(tag => `
+                                <span class="tag ${this.getTagClass(tag)}">${tag}</span>
+                            `).join('')}
                         </div>
                         
-                        <div class="post-footer">
-                            <span>👁️ ${post.views || 0} views</span>
-                            <span>${(post.tags || []).map(tag => `
-                                <span class="tag" onclick="filterByTag('${tag}')">#${tag}</span>
-                            `).join('')}</span>
-                            <span><a href="#" onclick="viewPost('${post.id}')" style="color: #3b82f6;">Read more →</a></span>
+                        <div class="project-meta">
+                            <div>
+                                <div class="project-lead">👤 ${this.escapeHtml(project.lead || 'Unassigned')}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">
+                                    ${project.team?.length || 0} team members
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                                    📅 ${this.formatDate(project.startDate)}
+                                </div>
+                                <div style="font-size: 0.75rem; color: var(--medical-blue); margin-top: 4px;">
+                                    ${project.milestones?.filter(m => m.status === 'completed').length || 0}/${project.milestones?.length || 0} milestones
+                                </div>
+                            </div>
                         </div>
-                    </article>
+                    </div>
                 `).join('');
             }
             
-            async loadStats() {
+            async loadQuickStats() {
                 try {
-                    const response = await fetch(`${this.apiBase}/api/stats`);
+                    const response = await fetch(`${this.apiBase}/api/analytics`);
                     const data = await response.json();
                     
                     if (data.success) {
-                        this.renderStats(data.stats);
+                        document.getElementById('activeProjects').textContent = 
+                            data.analytics.projects.active;
+                        document.getElementById('teamMembers').textContent = 
+                            data.analytics.collaboration.totalMembers;
                     }
                 } catch (error) {
                     console.error('Error loading stats:', error);
                 }
             }
             
-            renderStats(stats) {
-                const container = document.getElementById('statsArea');
-                container.innerHTML = `
-                    <div class="stats-grid">
-                        <div class="stat">
-                            <div class="stat-value">${stats.totalPosts}</div>
-                            <div class="stat-label">Total Posts</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value">${stats.publishedPosts}</div>
-                            <div class="stat-label">Published</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value">${stats.totalViews}</div>
-                            <div class="stat-label">Total Views</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value">${stats.totalLikes}</div>
-                            <div class="stat-label">Total Likes</div>
-                        </div>
-                    </div>
+            async populateProjectSelect() {
+                try {
+                    const response = await fetch(`${this.apiBase}/api/projects`);
+                    const data = await response.json();
+                    const select = document.getElementById('discussionProject');
                     
-                    <div style="margin-top: 1.5rem;">
-                        <h4 style="margin-bottom: 0.5rem;">👑 Top Authors</h4>
-                        ${stats.topAuthors.map(([author, count]) => `
-                            <div style="display: flex; justify-content: space-between; margin: 0.25rem 0;">
-                                <span>${this.escapeHtml(author)}</span>
-                                <span style="color: #64748b;">${count} posts</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
+                    if (data.success) {
+                        select.innerHTML = '<option value="">Select a project</option>' +
+                            data.projects.map(p => `
+                                <option value="${p.id}">${this.escapeHtml(p.title)}</option>
+                            `).join('');
+                    }
+                } catch (error) {
+                    console.error('Error populating projects:', error);
+                }
             }
             
-            updateTags(posts) {
-                const container = document.getElementById('tagsArea');
-                const tagCounts = {};
+            async createProject() {
+                const title = document.getElementById('projectTitle').value.trim();
+                const description = document.getElementById('projectDescription').value.trim();
+                const lead = document.getElementById('projectLead').value.trim() || this.userName;
                 
-                posts.forEach(post => {
-                    (post.tags || []).forEach(tag => {
-                        tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-                    });
-                });
-                
-                const sortedTags = Object.entries(tagCounts)
-                    .sort((a, b) => b[1] - a[1])
-                    .slice(0, 10);
-                
-                container.innerHTML = sortedTags.map(([tag, count]) => `
-                    <span class="tag" onclick="filterByTag('${tag}')">
-                        ${tag} (${count})
-                    </span>
-                `).join('');
-            }
-            
-            async createPost() {
-                const author = document.getElementById('postAuthor').value.trim() || 'anonymous';
-                const title = document.getElementById('postTitle').value.trim();
-                const tags = document.getElementById('postTags').value.split(',').map(t => t.trim()).filter(t => t);
-                const content = document.getElementById('postContent').value.trim();
-                
-                if (!title || !content) {
-                    alert('Please fill in title and content');
+                if (!title || !description) {
+                    alert('Please fill in title and description');
                     return;
                 }
                 
-                // Save author for future posts
-                localStorage.setItem('blog-author', author);
-                this.currentAuthor = author;
+                // Get selected tags
+                const selectedTags = Array.from(document.querySelectorAll('#projectTagsSelect .tag.active'))
+                    .map(tag => tag.textContent);
                 
                 try {
-                    const response = await fetch(`${this.apiBase}/api/posts`, {
+                    const response = await fetch(`${this.apiBase}/api/projects`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ author, title, content, tags })
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        alert('🎉 Post created successfully!');
-                        closeEditor();
-                        await this.loadPosts();
-                        await this.loadStats();
-                    } else {
-                        alert('Error: ' + data.error);
-                    }
-                } catch (error) {
-                    console.error('Error creating post:', error);
-                    alert('Failed to create post');
-                }
-            }
-            
-            async viewPost(id) {
-                try {
-                    const response = await fetch(`${this.apiBase}/api/posts/${id}`);
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        this.renderSinglePost(data.post);
-                    }
-                } catch (error) {
-                    console.error('Error viewing post:', error);
-                }
-            }
-            
-            renderSinglePost(post) {
-                const container = document.getElementById('contentArea');
-                container.innerHTML = `
-                    <div class="post-card">
-                        <div class="post-header">
-                            <div>
-                                <h1 class="post-title">${this.escapeHtml(post.title)}</h1>
-                                <div class="post-author">
-                                    By ${this.escapeHtml(post.author)} • ${this.formatDate(post.date)}
-                                    ${post.status === 'pending' ? '⏳ (Pending approval)' : ''}
-                                </div>
-                            </div>
-                            <button class="btn" onclick="likePost('${post.id}')">❤️ ${post.likes || 0}</button>
-                        </div>
-                        
-                        <div class="markdown-content">
-                            ${this.renderMarkdown(post.content)}
-                        </div>
-                        
-                        <div class="post-footer">
-                            <span>👁️ ${post.views || 0} views</span>
-                            <span>${(post.tags || []).map(tag => `
-                                <span class="tag" onclick="filterByTag('${tag}')">#${tag}</span>
-                            `).join('')}</span>
-                            <button class="btn" onclick="loadPosts()">← Back to all posts</button>
-                        </div>
-                        
-                        <!-- Comments -->
-                        <div class="comments">
-                            <h3 style="margin-bottom: 1rem;">💬 Comments</h3>
-                            
-                            ${(post.comments || []).map(comment => `
-                                <div class="comment">
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <div class="comment-author">${this.escapeHtml(comment.author)}</div>
-                                        <div class="comment-date">${this.formatDate(comment.date)}</div>
-                                    </div>
-                                    <div class="comment-content">${this.escapeHtml(comment.content)}</div>
-                                </div>
-                            `).join('')}
-                            
-                            <form onsubmit="return false;" style="margin-top: 1rem;">
-                                <textarea id="comment-${post.id}" placeholder="Add a comment..." style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 0.5rem;"></textarea>
-                                <button class="btn btn-primary" onclick="addComment('${post.id}')">Add Comment</button>
-                            </form>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            async likePost(id) {
-                try {
-                    const response = await fetch(`${this.apiBase}/api/posts/${id}/like`, {
-                        method: 'POST'
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        // Update like count in UI
-                        const likeBtn = document.querySelector(`#post-${id} .btn`);
-                        if (likeBtn) {
-                            likeBtn.innerHTML = `❤️ ${data.likes}`;
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error liking post:', error);
-                }
-            }
-            
-            async addComment(postId) {
-                const commentInput = document.getElementById(`comment-${postId}`);
-                const content = commentInput.value.trim();
-                
-                if (!content) {
-                    alert('Please enter a comment');
-                    return;
-                }
-                
-                try {
-                    const response = await fetch(`${this.apiBase}/api/posts/${postId}/comments`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            author: this.currentAuthor || 'anonymous',
-                            content 
+                        body: JSON.stringify({
+                            title,
+                            description,
+                            lead,
+                            tags: selectedTags,
+                            type: 'mini-project'
                         })
                     });
                     
                     const data = await response.json();
                     
                     if (data.success) {
-                        commentInput.value = '';
-                        await this.viewPost(postId); // Refresh the view
+                        alert('🎉 Project created successfully!');
+                        closeModal('createProjectModal');
+                        await this.loadProjects();
+                        await this.loadQuickStats();
+                        await this.populateProjectSelect();
+                        
+                        // Reset form
+                        document.getElementById('projectForm').reset();
+                        document.querySelectorAll('#projectTagsSelect .tag.active').forEach(tag => {
+                            tag.classList.remove('active');
+                        });
+                    } else {
+                        alert('Error: ' + data.error);
                     }
                 } catch (error) {
-                    console.error('Error adding comment:', error);
-                    alert('Failed to add comment');
+                    console.error('Error creating project:', error);
+                    alert('Failed to create project');
                 }
             }
             
+            async createDiscussion() {
+                const title = document.getElementById('discussionTitle').value.trim();
+                const projectId = document.getElementById('discussionProject').value;
+                const type = document.getElementById('discussionType').value;
+                const content = document.getElementById('discussionContent').value.trim();
+                
+                if (!title || !projectId || !content) {
+                    alert('Please fill in all required fields');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`${this.apiBase}/api/discussions`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            title,
+                            projectId,
+                            content,
+                            author: this.userName,
+                            type
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert('💬 Discussion started!');
+                        closeModal('createDiscussionModal');
+                        
+                        // Reset form
+                        document.getElementById('discussionForm').reset();
+                        
+                        // Switch to discussions tab
+                        switchTab('discussions');
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('Error creating discussion:', error);
+                    alert('Failed to start discussion');
+                }
+            }
+            
+            async viewProject(projectId) {
+                try {
+                    const response = await fetch(`${this.apiBase}/api/projects/${projectId}`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.renderProjectDetails(data);
+                    }
+                } catch (error) {
+                    console.error('Error viewing project:', error);
+                }
+            }
+            
+            renderProjectDetails(data) {
+                const { project, discussions, team, models, analytics } = data;
+                
+                document.getElementById('projectModalTitle').textContent = project.title;
+                
+                document.getElementById('projectModalBody').innerHTML = `
+                    <div style="margin-bottom: 24px;">
+                        <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                            <span class="chip priority-${project.priority}">${project.priority.toUpperCase()}</span>
+                            <span class="project-status status-${project.status}">${project.status}</span>
+                            <span class="phase-badge">${project.phase}</span>
+                        </div>
+                        
+                        <p style="color: var(--text-primary); line-height: 1.8; margin-bottom: 24px;">
+                            ${this.escapeHtml(project.description)}
+                        </p>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px;">
+                            <div>
+                                <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 4px;">Project Lead</div>
+                                <div style="font-weight: 600;">👤 ${project.lead}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 4px;">Timeline</div>
+                                <div style="font-weight: 600;">📅 ${project.startDate} → ${project.endDate || 'Ongoing'}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 4px;">Institutions</div>
+                                <div style="font-weight: 600;">🏛️ ${project.institutions?.join(', ') || 'GSK'}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 4px;">Progress</div>
+                                <div style="font-weight: 600;">📊 ${analytics.milestoneProgress}/${project.milestones?.length || 0} milestones</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tags -->
+                    <div style="margin-bottom: 24px;">
+                        <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 8px;">Tags</div>
+                        <div class="filter-tags">
+                            ${project.tags?.map(tag => `
+                                <span class="tag ${this.getTagClass(tag)}">${tag}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- Tabs within modal -->
+                    <div class="tabs" style="margin-bottom: 24px;">
+                        <button class="tab active" onclick="switchProjectTab('milestones')">🎯 Milestones</button>
+                        <button class="tab" onclick="switchProjectTab('team')">👥 Team (${team.length})</button>
+                        <button class="tab" onclick="switchProjectTab('discussions')">💬 Discussions (${discussions.length})</button>
+                        <button class="tab" onclick="switchProjectTab('models')">🤖 AI Models (${models.length})</button>
+                    </div>
+                    
+                    <!-- Milestones Tab -->
+                    <div id="projectMilestonesTab" class="tab-content active">
+                        ${project.milestones?.length > 0 ? `
+                            <div style="display: grid; gap: 12px;">
+                                ${project.milestones.map(milestone => `
+                                    <div style="background: var(--bg-light); border-radius: var(--radius); padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+                                        <div>
+                                            <div style="font-weight: 600; margin-bottom: 4px;">${milestone.title}</div>
+                                            <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                                                Due: ${milestone.dueDate || 'No date'} • Assignee: ${milestone.assignee || 'Unassigned'}
+                                            </div>
+                                        </div>
+                                        <span class="project-status status-${milestone.status}">
+                                            ${milestone.status}
+                                        </span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : `
+                            <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                                <div>No milestones yet</div>
+                                <button class="btn" onclick="addMilestone('${project.id}')" style="margin-top: 16px;">
+                                    + Add First Milestone
+                                </button>
+                            </div>
+                        `}
+                    </div>
+                    
+                    <!-- Team Tab -->
+                    <div id="projectTeamTab" class="tab-content">
+                        ${team.length > 0 ? `
+                            <div style="display: grid; gap: 12px;">
+                                ${team.filter(m => m).map(member => `
+                                    <div style="background: var(--bg-light); border-radius: var(--radius); padding: 16px; display: flex; align-items: center; gap: 12px;">
+                                        <div style="width: 40px; height: 40px; background: var(--medical-blue); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600;">
+                                            ${member.name.charAt(0).toUpperCase()}
+                                        </div>
+                                        <div style="flex: 1;">
+                                            <div style="font-weight: 600;">${member.name}</div>
+                                            <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                                                ${member.role} • ${member.specialty}
+                                            </div>
+                                        </div>
+                                        <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                                            ${member.institution}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : `
+                            <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                                <div>No team members yet</div>
+                                <button class="btn" onclick="addTeamMember('${project.id}')" style="margin-top: 16px;">
+                                    + Add Team Member
+                                </button>
+                            </div>
+                        `}
+                    </div>
+                    
+                    <!-- Discussions Tab -->
+                    <div id="projectDiscussionsTab" class="tab-content">
+                        ${discussions.length > 0 ? `
+                            <div style="display: grid; gap: 16px;">
+                                ${discussions.map(discussion => `
+                                    <div style="background: var(--bg-light); border-radius: var(--radius); padding: 16px;">
+                                        <div style="font-weight: 600; margin-bottom: 8px;">${discussion.title}</div>
+                                        <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 12px;">
+                                            By ${discussion.author} • ${this.formatDate(discussion.createdAt)}
+                                        </div>
+                                        <div style="color: var(--text-primary); line-height: 1.6; margin-bottom: 12px;">
+                                            ${discussion.content.substring(0, 150)}${discussion.content.length > 150 ? '...' : ''}
+                                        </div>
+                                        <div style="font-size: 0.75rem; color: var(--medical-blue);">
+                                            💬 ${discussion.comments?.length || 0} comments
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : `
+                            <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                                <div>No discussions yet</div>
+                                <button class="btn" onclick="startDiscussionForProject('${project.id}')" style="margin-top: 16px;">
+                                    💬 Start First Discussion
+                                </button>
+                            </div>
+                        `}
+                    </div>
+                    
+                    <!-- Models Tab -->
+                    <div id="projectModelsTab" class="tab-content">
+                        ${models.length > 0 ? `
+                            <div style="display: grid; gap: 12px;">
+                                ${models.map(model => `
+                                    <div style="background: var(--bg-light); border-radius: var(--radius); padding: 16px;">
+                                        <div style="font-weight: 600; margin-bottom: 8px;">${model.name}</div>
+                                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; font-size: 0.875rem;">
+                                            <div>
+                                                <div style="color: var(--text-secondary);">Type</div>
+                                                <div>${model.type}</div>
+                                            </div>
+                                            <div>
+                                                <div style="color: var(--text-secondary);">Framework</div>
+                                                <div>${model.framework}</div>
+                                            </div>
+                                            <div>
+                                                <div style="color: var(--text-secondary);">Accuracy</div>
+                                                <div>${model.accuracy || 'N/A'}</div>
+                                            </div>
+                                            <div>
+                                                <div style="color: var(--text-secondary);">Status</div>
+                                                <span class="project-status status-${model.status}">${model.status}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : `
+                            <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                                <div>No AI models yet</div>
+                            </div>
+                        `}
+                    </div>
+                `;
+                
+                openModal('projectDetailsModal');
+            }
+            
             // ========== UTILITIES ==========
-            renderMarkdown(text) {
-                return text
-                    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-                    .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-                    .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                    .replace(/`([^`]+)`/g, '<code>$1</code>')
-                    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img alt="$1" src="$2" style="max-width:100%;">')
-                    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
-                    .replace(/^\s*-\s+(.*$)/gm, '<li>$1</li>')
-                    .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
-                    .replace(/^\s*\d+\.\s+(.*$)/gm, '<li>$1</li>')
-                    .replace(/(<li>.*<\/li>)/s, '<ol>$1</ol>')
-                    .replace(/^>\s+(.*$)/gm, '<blockquote>$1</blockquote>')
-                    .replace(/\n\n/g, '</p><p>')
-                    .replace(/\n/g, '<br>');
+            getTagClass(tag) {
+                const tagLower = tag.toLowerCase();
+                if (tagLower.includes('copd')) return 'tag-copd';
+                if (tagLower.includes('asthma')) return 'tag-asthma';
+                if (tagLower.includes('ai') || tagLower.includes('ml')) return 'tag-ai';
+                return '';
             }
             
             formatDate(dateStr) {
+                if (!dateStr) return 'No date';
                 const date = new Date(dateStr);
-                const now = new Date();
-                const diff = now - date;
-                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                
-                if (days === 0) return 'Today';
-                if (days === 1) return 'Yesterday';
-                if (days < 7) return `${days} days ago`;
-                if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
-                return date.toLocaleDateString();
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
             }
             
             escapeHtml(text) {
@@ -530,76 +1241,345 @@
             
             loadTheme() {
                 if (localStorage.getItem('theme') === 'dark') {
-                    document.body.classList.add('dark');
+                    document.body.classList.add('dark-mode');
                     document.getElementById('themeBtn').textContent = '☀️';
                 }
             }
             
             toggleTheme() {
-                document.body.classList.toggle('dark');
-                const isDark = document.body.classList.contains('dark');
+                document.body.classList.toggle('dark-mode');
+                const isDark = document.body.classList.contains('dark-mode');
                 localStorage.setItem('theme', isDark ? 'dark' : 'light');
                 document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌙';
             }
             
             showError(message) {
-                const container = document.getElementById('contentArea');
+                const container = document.getElementById('projectsArea');
                 container.innerHTML = `
-                    <div class="post-card">
-                        <h2>⚠️ Error</h2>
-                        <p>${message}</p>
-                        <button class="btn" onclick="location.reload()" style="margin-top: 1rem;">Retry</button>
+                    <div class="project-card">
+                        <h2 style="color: var(--danger); margin-bottom: 1rem;">⚠️ Error</h2>
+                        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">${message}</p>
+                        <button class="btn btn-primary" onclick="location.reload()">Retry</button>
                     </div>
                 `;
             }
         }
         
-        // ========== GLOBAL ==========
-        const blog = new BlogPlatform();
+        // ========== GLOBAL FUNCTIONS ==========
+        const platform = new MedCollabPlatform();
         
-        function openEditor() {
-            document.getElementById('editorModal').classList.add('active');
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
         }
         
-        function closeEditor() {
-            document.getElementById('editorModal').classList.remove('active');
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
         }
         
-        function createPost() {
-            blog.createPost();
-        }
-        
-        function loadPosts() {
-            blog.loadPosts();
+        function toggleTag(element, tag) {
+            element.classList.toggle('active');
         }
         
         function filterByTag(tag) {
-            blog.loadPosts({ tag });
+            platform.currentFilters.tags = [tag];
+            platform.loadProjects();
+            
+            // Update UI
+            document.querySelectorAll('.filter-tags .tag').forEach(t => {
+                t.classList.remove('active');
+                if (t.textContent === tag) {
+                    t.classList.add('active');
+                }
+            });
         }
         
-        function showAllPosts() {
-            blog.loadPosts();
+        function clearFilters() {
+            platform.currentFilters.tags = [];
+            platform.loadProjects();
+            
+            // Update UI
+            document.querySelectorAll('.filter-tags .tag').forEach(t => {
+                t.classList.remove('active');
+            });
         }
         
-        function showMyPosts() {
-            const author = localStorage.getItem('blog-author') || 'anonymous';
-            blog.loadPosts({ author });
+        function switchTab(tabName) {
+            // Update tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.textContent.includes(tabName.charAt(0).toUpperCase() + tabName.slice(1))) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+                if (content.id === `${tabName}Tab`) {
+                    content.classList.add('active');
+                }
+            });
+            
+            // Load content if needed
+            platform.currentView = tabName;
+            
+            if (tabName === 'discussions') {
+                loadDiscussions();
+            } else if (tabName === 'team') {
+                loadTeam();
+            } else if (tabName === 'analytics') {
+                loadAnalytics();
+            }
         }
         
-        function viewPost(id) {
-            blog.viewPost(id);
+        async function loadDiscussions() {
+            try {
+                const response = await fetch(`${platform.apiBase}/api/discussions`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderDiscussions(data.discussions);
+                }
+            } catch (error) {
+                console.error('Error loading discussions:', error);
+            }
         }
         
-        function likePost(id) {
-            blog.likePost(id);
+        function renderDiscussions(discussions) {
+            const container = document.getElementById('discussionsArea');
+            
+            if (!discussions || discussions.length === 0) {
+                container.innerHTML = `
+                    <div class="project-card">
+                        <h2>No discussions yet</h2>
+                        <p style="color: var(--text-secondary); margin: 1rem 0;">Start the first discussion about your research!</p>
+                        <button class="btn btn-primary" onclick="openModal('createDiscussionModal')">
+                            💬 Start Discussion
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = discussions.map(discussion => `
+                <div class="discussion-thread">
+                    <div class="discussion-header">
+                        <div style="flex: 1;">
+                            <h3 class="discussion-title">${platform.escapeHtml(discussion.title)}</h3>
+                            <div class="discussion-meta">
+                                By ${platform.escapeHtml(discussion.author)} • 
+                                ${platform.formatDate(discussion.createdAt)} • 
+                                Project: <strong>${discussion.projectId}</strong>
+                            </div>
+                        </div>
+                        <span class="chip">${discussion.type}</span>
+                    </div>
+                    
+                    <div class="discussion-content">
+                        ${platform.escapeHtml(discussion.content.substring(0, 300))}${discussion.content.length > 300 ? '...' : ''}
+                    </div>
+                    
+                    <div style="font-size: 0.875rem; color: var(--medical-blue);">
+                        💬 ${discussion.comments?.length || 0} comments
+                    </div>
+                </div>
+            `).join('');
         }
         
-        function addComment(postId) {
-            blog.addComment(postId);
+        async function loadTeam() {
+            try {
+                const response = await fetch(`${platform.apiBase}/api/analytics`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderTeam(data.analytics);
+                }
+            } catch (error) {
+                console.error('Error loading team:', error);
+            }
+        }
+        
+        function renderTeam(analytics) {
+            const container = document.getElementById('teamArea');
+            
+            container.innerHTML = `
+                <div class="project-card">
+                    <h2 style="margin-bottom: 1.5rem;">👥 Research Team</h2>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px;">
+                        ${analytics.collaboration.institutions.map(institution => `
+                            <div style="background: var(--bg-light); border-radius: var(--radius); padding: 20px;">
+                                <div style="font-weight: 600; margin-bottom: 8px;">🏛️ ${institution}</div>
+                                <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                                    ${Math.floor(Math.random() * 5) + 1} active members
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div style="margin-top: 2rem;">
+                        <h3 style="margin-bottom: 1rem;">Top Contributors</h3>
+                        ${analytics.topAuthors.map(([author, count]) => `
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--border);">
+                                <div style="font-weight: 500;">${platform.escapeHtml(author)}</div>
+                                <div style="font-size: 0.875rem; color: var(--text-secondary);">${count} projects</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        async function loadAnalytics() {
+            try {
+                const response = await fetch(`${platform.apiBase}/api/analytics`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderAnalytics(data.analytics);
+                }
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+            }
+        }
+        
+        function renderAnalytics(analytics) {
+            const container = document.getElementById('analyticsArea');
+            
+            container.innerHTML = `
+                <div>
+                    <!-- Stats Overview -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                        <div class="stat-card">
+                            <div class="stat-value">${analytics.projects.total}</div>
+                            <div class="stat-label">Total Projects</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${analytics.projects.active}</div>
+                            <div class="stat-label">Active Projects</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${analytics.collaboration.totalMembers}</div>
+                            <div class="stat-label">Team Members</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${analytics.collaboration.activeDiscussions}</div>
+                            <div class="stat-label">Active Discussions</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Project Distribution -->
+                    <div class="project-card" style="margin-bottom: 24px;">
+                        <h3 style="margin-bottom: 1rem;">📊 Project Distribution</h3>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                            <div>
+                                <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 4px;">Phase 1</div>
+                                <div style="font-size: 2rem; font-weight: 700; color: var(--medical-blue);">${analytics.projects.byPhase.phase1}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 4px;">Phase 2</div>
+                                <div style="font-size: 2rem; font-weight: 700; color: var(--medical-green);">${analytics.projects.byPhase.phase2}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 4px;">Phase 3</div>
+                                <div style="font-size: 2rem; font-weight: 700; color: var(--medical-purple);">${analytics.projects.byPhase.phase3}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Projects -->
+                    <div class="project-card">
+                        <h3 style="margin-bottom: 1rem;">🆕 Recent Projects</h3>
+                        ${analytics.timeline.recentProjects.map(project => `
+                            <div style="padding: 12px; border-bottom: 1px solid var(--border);">
+                                <div style="font-weight: 500; margin-bottom: 4px;">${project.title}</div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="font-size: 0.875rem; color: var(--text-secondary);">${project.id}</span>
+                                    <span class="chip status-${project.status}">${project.status}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        function createProject() {
+            platform.createProject();
+        }
+        
+        function createDiscussion() {
+            platform.createDiscussion();
+        }
+        
+        function viewProject(projectId) {
+            platform.viewProject(projectId);
+        }
+        
+        function loadProjects() {
+            platform.loadProjects();
+        }
+        
+        function searchProjects() {
+            const query = prompt('Search projects, discussions, or team members:');
+            if (query) {
+                window.open(`${platform.apiBase}/api/search?q=${encodeURIComponent(query)}`, '_blank');
+            }
         }
         
         function toggleTheme() {
-            blog.toggleTheme();
+            platform.toggleTheme();
+        }
+        
+        // Project tab switching within modal
+        function switchProjectTab(tabName) {
+            ['Milestones', 'Team', 'Discussions', 'Models'].forEach(tab => {
+                const element = document.getElementById(`project${tab}Tab`);
+                if (element) {
+                    element.classList.remove('active');
+                }
+            });
+            
+            document.getElementById(`project${tabName.charAt(0).toUpperCase() + tabName.slice(1)}Tab`).classList.add('active');
+        }
+        
+        function addMilestone(projectId) {
+            const title = prompt('Milestone title:');
+            const dueDate = prompt('Due date (YYYY-MM-DD):');
+            const assignee = prompt('Assignee:');
+            
+            if (title && dueDate) {
+                fetch(`${platform.apiBase}/api/projects/${projectId}/milestones`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, dueDate, assignee })
+                }).then(() => {
+                    alert('Milestone added!');
+                    viewProject(projectId); // Refresh view
+                });
+            }
+        }
+        
+        function addTeamMember(projectId) {
+            const memberId = prompt('Team member ID/name:');
+            const role = prompt('Role:');
+            
+            if (memberId) {
+                fetch(`${platform.apiBase}/api/projects/${projectId}/team`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ memberId, role })
+                }).then(() => {
+                    alert('Team member added!');
+                    viewProject(projectId); // Refresh view
+                });
+            }
+        }
+        
+        function startDiscussionForProject(projectId) {
+            closeModal('projectDetailsModal');
+            openModal('createDiscussionModal');
+            document.getElementById('discussionProject').value = projectId;
         }
     </script>
 </body>
