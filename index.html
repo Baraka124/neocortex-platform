@@ -3,409 +3,493 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Railway Platform 🚀</title>
+    <title>🎯 3-File Dynamic Blog</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.6; }
+        .dark { background: #0f172a; color: #f1f5f9; }
         
-        :root {
-            --bg: #ffffff;
-            --surface: #f8fafc;
-            --text: #1e293b;
-            --text-light: #64748b;
-            --primary: #3b82f6;
-            --accent: #8b5cf6;
-            --success: #10b981;
-            --border: #e2e8f0;
-            --radius: 8px;
-        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; margin-bottom: 2rem; border-bottom: 2px solid #e2e8f0; }
+        .dark .header { border-color: #334155; }
+        .logo { font-size: 1.5rem; font-weight: bold; color: #3b82f6; }
         
-        .dark-mode {
-            --bg: #0f172a;
-            --surface: #1e293b;
-            --text: #f1f5f9;
-            --text-light: #94a3b8;
-            --border: #334155;
-        }
+        .btn { padding: 0.5rem 1rem; border: 1px solid #e2e8f0; background: white; border-radius: 8px; cursor: pointer; font-size: 0.875rem; }
+        .dark .btn { background: #1e293b; border-color: #334155; color: #f1f5f9; }
+        .btn-primary { background: #3b82f6; color: white; border: none; }
         
-        body {
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            transition: all 0.3s ease;
-        }
+        /* Grid Layout */
+        .main-grid { display: grid; grid-template-columns: 1fr 300px; gap: 2rem; }
+        @media (max-width: 768px) { .main-grid { grid-template-columns: 1fr; } }
         
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+        /* Posts */
+        .posts-grid { display: grid; gap: 1.5rem; }
+        .post-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; transition: all 0.3s; }
+        .dark .post-card { background: #1e293b; border-color: #334155; }
+        .post-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .post-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem; }
+        .post-title { font-size: 1.25rem; font-weight: 600; color: #1e293b; }
+        .dark .post-title { color: #f1f5f9; }
+        .post-author { color: #64748b; font-size: 0.875rem; }
+        .post-content { margin: 1rem 0; line-height: 1.7; }
+        .post-footer { display: flex; gap: 1rem; color: #64748b; font-size: 0.875rem; margin-top: 1rem; }
         
-        /* Header */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 0;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 2rem;
-        }
+        /* Editor Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; padding: 20px; overflow-y: auto; }
+        .modal.active { display: block; }
+        .modal-content { max-width: 800px; margin: 2rem auto; background: white; border-radius: 12px; padding: 2rem; }
+        .dark .modal-content { background: #1e293b; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .modal-title { font-size: 1.5rem; font-weight: 600; }
+        .modal-close { font-size: 1.5rem; cursor: pointer; padding: 0.5rem; }
         
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--primary);
-            text-decoration: none;
-        }
+        .form-group { margin-bottom: 1rem; }
+        .form-label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+        .form-input { width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem; }
+        .dark .form-input { background: #0f172a; border-color: #334155; color: #f1f5f9; }
+        .form-textarea { width: 100%; min-height: 300px; padding: 1rem; border: 1px solid #e2e8f0; border-radius: 8px; font-family: 'SF Mono', monospace; font-size: 14px; resize: vertical; }
+        .dark .form-textarea { background: #0f172a; border-color: #334155; color: #f1f5f9; }
         
-        .controls {
-            display: flex;
-            gap: 0.5rem;
-        }
+        /* Sidebar */
+        .sidebar { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; }
+        .dark .sidebar { background: #1e293b; border-color: #334155; }
+        .sidebar-section { margin-bottom: 2rem; }
+        .sidebar-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; }
         
-        .btn {
-            padding: 0.5rem 1rem;
-            border: 1px solid var(--border);
-            background: var(--surface);
-            color: var(--text);
-            border-radius: var(--radius);
-            cursor: pointer;
-            font-size: 0.875rem;
-        }
+        .tag { display: inline-block; background: rgba(59,130,246,0.1); color: #3b82f6; padding: 0.25rem 0.75rem; border-radius: 100px; font-size: 0.75rem; margin: 0.25rem; cursor: pointer; }
+        .tag:hover { background: rgba(59,130,246,0.2); }
         
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            border: none;
-        }
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        .stat { text-align: center; }
+        .stat-value { font-size: 2rem; font-weight: bold; color: #3b82f6; }
+        .stat-label { font-size: 0.875rem; color: #64748b; }
         
-        /* Content */
-        .content-section {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
+        /* Markdown Content */
+        .markdown-content h1, .markdown-content h2, .markdown-content h3 { margin: 1.5rem 0 1rem; }
+        .markdown-content p { margin: 1rem 0; }
+        .markdown-content code { background: rgba(0,0,0,0.1); padding: 0.2rem 0.4rem; border-radius: 4px; font-family: 'SF Mono', monospace; }
+        .dark .markdown-content code { background: rgba(255,255,255,0.1); }
+        .markdown-content pre { background: rgba(0,0,0,0.05); padding: 1rem; border-radius: 8px; overflow-x: auto; margin: 1rem 0; }
+        .dark .markdown-content pre { background: rgba(255,255,255,0.05); }
+        .markdown-content blockquote { border-left: 4px solid #3b82f6; padding-left: 1rem; margin: 1rem 0; color: #64748b; }
         
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 1rem;
-        }
+        /* Loading */
+        .loading { text-align: center; padding: 4rem; color: #64748b; }
+        .spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid rgba(59,130,246,0.3); border-radius: 50%; border-top-color: #3b82f6; animation: spin 1s linear infinite; margin-bottom: 1rem; }
         
-        .section-title {
-            font-size: 1.5rem;
-            color: var(--text);
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
         
-        .section-date {
-            color: var(--text-light);
-            font-size: 0.875rem;
-        }
-        
-        .section-content {
-            color: var(--text);
-            line-height: 1.8;
-        }
-        
-        .section-content h1,
-        .section-content h2,
-        .section-content h3 {
-            margin: 1.5rem 0 1rem;
-        }
-        
-        .section-content p {
-            margin: 1rem 0;
-        }
-        
-        .section-content code {
-            background: rgba(0,0,0,0.1);
-            padding: 0.2rem 0.4rem;
-            border-radius: 4px;
-            font-family: 'SF Mono', monospace;
-        }
-        
-        .section-tags {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
-            flex-wrap: wrap;
-        }
-        
-        .tag {
-            background: rgba(59,130,246,0.1);
-            color: var(--primary);
-            padding: 0.25rem 0.75rem;
-            border-radius: 100px;
-            font-size: 0.75rem;
-        }
-        
-        /* Editor */
-        .editor {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-            padding: 20px;
-            overflow-y: auto;
-        }
-        
-        .editor.active {
-            display: block;
-        }
-        
-        .editor-box {
-            max-width: 800px;
-            margin: 2rem auto;
-            background: var(--surface);
-            border-radius: var(--radius);
-            padding: 2rem;
-            border: 1px solid var(--border);
-        }
-        
-        .editor-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-        
-        .editor-title {
-            font-size: 1.25rem;
-            color: var(--text);
-        }
-        
-        .editor-input {
-            width: 100%;
-            min-height: 400px;
-            font-family: 'SF Mono', monospace;
-            font-size: 14px;
-            background: var(--bg);
-            color: var(--text);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 1rem;
-            resize: vertical;
-            margin-bottom: 1rem;
-        }
-        
-        .editor-actions {
-            display: flex;
-            gap: 0.5rem;
-            justify-content: flex-end;
-        }
-        
-        /* Notifications */
-        .notification {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--surface);
-            color: var(--text);
-            padding: 1rem 1.5rem;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            transform: translateY(100px);
-            transition: transform 0.3s ease;
-        }
-        
-        .notification.show {
-            transform: translateY(0);
-        }
-        
-        .notification.success {
-            border-left: 4px solid var(--success);
-        }
-        
-        @media (max-width: 640px) {
-            .container {
-                padding: 10px;
-            }
-            
-            .content-section {
-                padding: 1rem;
-            }
-            
-            .editor-box {
-                padding: 1rem;
-                margin: 1rem;
-            }
-        }
+        /* Comments */
+        .comments { margin-top: 2rem; border-top: 1px solid #e2e8f0; padding-top: 1rem; }
+        .dark .comments { border-color: #334155; }
+        .comment { background: rgba(0,0,0,0.03); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+        .dark .comment { background: rgba(255,255,255,0.05); }
+        .comment-author { font-weight: 600; color: #3b82f6; }
+        .comment-date { color: #64748b; font-size: 0.75rem; }
+        .comment-content { margin: 0.5rem 0; }
     </style>
 </head>
 <body>
-    <!-- Editor -->
-    <div class="editor" id="editor">
-        <div class="editor-box">
-            <div class="editor-header">
-                <div class="editor-title">Edit Content ✏️</div>
-                <button class="btn" onclick="closeEditor()">Close</button>
+    <!-- Editor Modal -->
+    <div class="modal" id="editorModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Create New Post ✨</div>
+                <div class="modal-close" onclick="closeEditor()">×</div>
             </div>
-            <textarea class="editor-input" id="editorInput" spellcheck="false"></textarea>
-            <div class="editor-actions">
-                <button class="btn" onclick="closeEditor()">Cancel</button>
-                <button class="btn btn-primary" onclick="saveContent()">💾 Save Changes</button>
-            </div>
+            
+            <form id="postForm" onsubmit="return false;">
+                <div class="form-group">
+                    <label class="form-label">Your Name</label>
+                    <input type="text" class="form-input" id="postAuthor" placeholder="Enter your name (optional)" />
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Post Title</label>
+                    <input type="text" class="form-input" id="postTitle" placeholder="Enter a catchy title" required />
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Tags (comma separated)</label>
+                    <input type="text" class="form-input" id="postTags" placeholder="blog, web, ideas, technology" />
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Content (Markdown supported)</label>
+                    <textarea class="form-textarea" id="postContent" placeholder="Write your post here... Markdown is supported!
+                    
+# Like this
+## And this
+**Bold text** and *italic text*
+- Lists
+- More lists
+`code snippets`
+> Quotes
+[Links](https://example.com)" required></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                    <button type="button" class="btn" onclick="closeEditor()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" onclick="createPost()">📝 Publish Post</button>
+                </div>
+            </form>
         </div>
     </div>
     
-    <!-- Notification -->
-    <div class="notification" id="notification"></div>
-    
-    <!-- Main Content -->
+    <!-- Main App -->
     <div class="container">
         <div class="header">
-            <div class="logo">🚀 My Platform</div>
-            <div class="controls">
+            <div class="logo">🎯 3-File Blog</div>
+            <div style="display: flex; gap: 0.5rem;">
                 <button class="btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
-                <button class="btn btn-primary" onclick="openEditor()">✏️ Edit Content</button>
+                <button class="btn btn-primary" onclick="openEditor()">+ New Post</button>
             </div>
         </div>
         
-        <div id="contentContainer">
-            <!-- Content loads here -->
-            <div style="text-align: center; padding: 4rem; color: var(--text-light);">
-                <div style="width: 40px; height: 40px; border: 3px solid rgba(59,130,246,0.3); border-radius: 50%; border-top-color: var(--primary); animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
-                Loading content...
+        <div class="main-grid">
+            <!-- Main Content -->
+            <div>
+                <div id="contentArea">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading posts...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">📊 Live Stats</h3>
+                    <div id="statsArea">
+                        <div class="loading" style="padding: 1rem;">
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">🏷️ Popular Tags</h3>
+                    <div id="tagsArea">
+                        <!-- Tags load here -->
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">🔍 Quick Actions</h3>
+                    <div style="display: grid; gap: 0.5rem;">
+                        <button class="btn" onclick="loadPosts()">🔄 Refresh</button>
+                        <button class="btn" onclick="showAllPosts()">📚 View All</button>
+                        <button class="btn" onclick="showMyPosts()">👤 My Posts</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
     
     <script>
         // ========== CORE ==========
-        class Platform {
+        class BlogPlatform {
             constructor() {
-                this.content = '';
-                this.sections = [];
                 this.apiBase = window.location.origin;
+                this.currentAuthor = localStorage.getItem('blog-author') || '';
+                this.currentView = 'all';
                 this.init();
             }
             
             async init() {
                 this.loadTheme();
-                await this.loadContent();
-                this.render();
-                console.log('🚀 Platform ready!');
+                await this.loadPosts();
+                await this.loadStats();
+                console.log('🚀 Blog platform ready!');
             }
             
-            async loadContent() {
+            async loadPosts(filter = {}) {
                 try {
-                    const response = await fetch(`${this.apiBase}/api/content`);
+                    // Build query string
+                    const params = new URLSearchParams();
+                    if (filter.author) params.append('author', filter.author);
+                    if (filter.tag) params.append('tag', filter.tag);
+                    if (filter.search) params.append('search', filter.search);
+                    
+                    const response = await fetch(`${this.apiBase}/api/posts?${params}`);
                     const data = await response.json();
                     
                     if (data.success) {
-                        this.content = data.content;
-                        this.parseContent();
-                        this.showNotification('Content loaded', 'success');
-                    } else {
-                        throw new Error('Failed to load');
+                        this.renderPosts(data.posts);
+                        this.updateTags(data.posts);
                     }
                 } catch (error) {
-                    console.error('Error loading:', error);
-                    this.showNotification('Using offline mode', 'error');
-                    this.loadDemoContent();
+                    console.error('Error loading posts:', error);
+                    this.showError('Failed to load posts');
                 }
             }
             
-            parseContent() {
-                const rawSections = this.content.split(/\n---\n/);
-                this.sections = [];
+            renderPosts(posts) {
+                const container = document.getElementById('contentArea');
                 
-                rawSections.forEach((section, index) => {
-                    if (section.trim()) {
-                        const parsed = this.parseSection(section, index);
-                        if (parsed) {
-                            this.sections.push(parsed);
-                        }
-                    }
-                });
-            }
-            
-            parseSection(text, id) {
-                const lines = text.trim().split('\n');
-                const section = {
-                    id,
-                    title: 'Untitled',
-                    content: '',
-                    date: new Date().toISOString().split('T')[0],
-                    tags: [],
-                    raw: text
-                };
-                
-                let inFrontmatter = false;
-                let contentLines = [];
-                
-                for (const line of lines) {
-                    if (line.trim() === '---') {
-                        inFrontmatter = !inFrontmatter;
-                        continue;
-                    }
-                    
-                    if (inFrontmatter) {
-                        const match = line.match(/^([^:]+):\s*(.+)$/);
-                        if (match) {
-                            const [, key, value] = match;
-                            const cleanKey = key.trim().toLowerCase();
-                            const cleanValue = value.trim();
-                            
-                            if (cleanKey === 'title') section.title = cleanValue;
-                            if (cleanKey === 'date') section.date = cleanValue;
-                            if (cleanKey === 'tags') section.tags = cleanValue.split(',').map(t => t.trim());
-                        }
-                    } else {
-                        contentLines.push(line);
-                    }
-                }
-                
-                section.content = contentLines.join('\n');
-                return section;
-            }
-            
-            render() {
-                const container = document.getElementById('contentContainer');
-                if (this.sections.length === 0) {
+                if (!posts || posts.length === 0) {
                     container.innerHTML = `
-                        <div class="content-section">
-                            <h2>Start Writing ✍️</h2>
-                            <p>Click the Edit button to add your first content!</p>
+                        <div class="post-card">
+                            <h2>No posts yet 😴</h2>
+                            <p>Be the first to create a post!</p>
+                            <button class="btn btn-primary" onclick="openEditor()" style="margin-top: 1rem;">
+                                + Create First Post
+                            </button>
                         </div>
                     `;
                     return;
                 }
                 
-                container.innerHTML = this.sections.map(section => `
-                    <article class="content-section">
-                        <div class="section-header">
-                            <h2 class="section-title">${section.title}</h2>
-                            <span class="section-date">${this.formatDate(section.date)}</span>
-                        </div>
-                        
-                        <div class="section-content">
-                            ${this.renderMarkdown(section.content)}
-                        </div>
-                        
-                        ${section.tags.length > 0 ? `
-                            <div class="section-tags">
-                                ${section.tags.map(tag => `
-                                    <span class="tag">#${tag}</span>
-                                `).join('')}
+                container.innerHTML = posts.map(post => `
+                    <article class="post-card" id="post-${post.id}">
+                        <div class="post-header">
+                            <div>
+                                <h2 class="post-title">${this.escapeHtml(post.title)}</h2>
+                                <div class="post-author">
+                                    By ${this.escapeHtml(post.author)} • ${this.formatDate(post.date)}
+                                    ${post.status === 'pending' ? '⏳ (Pending)' : ''}
+                                </div>
                             </div>
-                        ` : ''}
+                            <button class="btn" onclick="likePost('${post.id}')">❤️ ${post.likes || 0}</button>
+                        </div>
+                        
+                        <div class="post-content markdown-content">
+                            ${this.renderMarkdown(post.content.substring(0, 500) + (post.content.length > 500 ? '...' : ''))}
+                        </div>
+                        
+                        <div class="post-footer">
+                            <span>👁️ ${post.views || 0} views</span>
+                            <span>${(post.tags || []).map(tag => `
+                                <span class="tag" onclick="filterByTag('${tag}')">#${tag}</span>
+                            `).join('')}</span>
+                            <span><a href="#" onclick="viewPost('${post.id}')" style="color: #3b82f6;">Read more →</a></span>
+                        </div>
                     </article>
                 `).join('');
             }
             
+            async loadStats() {
+                try {
+                    const response = await fetch(`${this.apiBase}/api/stats`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.renderStats(data.stats);
+                    }
+                } catch (error) {
+                    console.error('Error loading stats:', error);
+                }
+            }
+            
+            renderStats(stats) {
+                const container = document.getElementById('statsArea');
+                container.innerHTML = `
+                    <div class="stats-grid">
+                        <div class="stat">
+                            <div class="stat-value">${stats.totalPosts}</div>
+                            <div class="stat-label">Total Posts</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${stats.publishedPosts}</div>
+                            <div class="stat-label">Published</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${stats.totalViews}</div>
+                            <div class="stat-label">Total Views</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${stats.totalLikes}</div>
+                            <div class="stat-label">Total Likes</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 1.5rem;">
+                        <h4 style="margin-bottom: 0.5rem;">👑 Top Authors</h4>
+                        ${stats.topAuthors.map(([author, count]) => `
+                            <div style="display: flex; justify-content: space-between; margin: 0.25rem 0;">
+                                <span>${this.escapeHtml(author)}</span>
+                                <span style="color: #64748b;">${count} posts</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            updateTags(posts) {
+                const container = document.getElementById('tagsArea');
+                const tagCounts = {};
+                
+                posts.forEach(post => {
+                    (post.tags || []).forEach(tag => {
+                        tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+                    });
+                });
+                
+                const sortedTags = Object.entries(tagCounts)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 10);
+                
+                container.innerHTML = sortedTags.map(([tag, count]) => `
+                    <span class="tag" onclick="filterByTag('${tag}')">
+                        ${tag} (${count})
+                    </span>
+                `).join('');
+            }
+            
+            async createPost() {
+                const author = document.getElementById('postAuthor').value.trim() || 'anonymous';
+                const title = document.getElementById('postTitle').value.trim();
+                const tags = document.getElementById('postTags').value.split(',').map(t => t.trim()).filter(t => t);
+                const content = document.getElementById('postContent').value.trim();
+                
+                if (!title || !content) {
+                    alert('Please fill in title and content');
+                    return;
+                }
+                
+                // Save author for future posts
+                localStorage.setItem('blog-author', author);
+                this.currentAuthor = author;
+                
+                try {
+                    const response = await fetch(`${this.apiBase}/api/posts`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ author, title, content, tags })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert('🎉 Post created successfully!');
+                        closeEditor();
+                        await this.loadPosts();
+                        await this.loadStats();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('Error creating post:', error);
+                    alert('Failed to create post');
+                }
+            }
+            
+            async viewPost(id) {
+                try {
+                    const response = await fetch(`${this.apiBase}/api/posts/${id}`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.renderSinglePost(data.post);
+                    }
+                } catch (error) {
+                    console.error('Error viewing post:', error);
+                }
+            }
+            
+            renderSinglePost(post) {
+                const container = document.getElementById('contentArea');
+                container.innerHTML = `
+                    <div class="post-card">
+                        <div class="post-header">
+                            <div>
+                                <h1 class="post-title">${this.escapeHtml(post.title)}</h1>
+                                <div class="post-author">
+                                    By ${this.escapeHtml(post.author)} • ${this.formatDate(post.date)}
+                                    ${post.status === 'pending' ? '⏳ (Pending approval)' : ''}
+                                </div>
+                            </div>
+                            <button class="btn" onclick="likePost('${post.id}')">❤️ ${post.likes || 0}</button>
+                        </div>
+                        
+                        <div class="markdown-content">
+                            ${this.renderMarkdown(post.content)}
+                        </div>
+                        
+                        <div class="post-footer">
+                            <span>👁️ ${post.views || 0} views</span>
+                            <span>${(post.tags || []).map(tag => `
+                                <span class="tag" onclick="filterByTag('${tag}')">#${tag}</span>
+                            `).join('')}</span>
+                            <button class="btn" onclick="loadPosts()">← Back to all posts</button>
+                        </div>
+                        
+                        <!-- Comments -->
+                        <div class="comments">
+                            <h3 style="margin-bottom: 1rem;">💬 Comments</h3>
+                            
+                            ${(post.comments || []).map(comment => `
+                                <div class="comment">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <div class="comment-author">${this.escapeHtml(comment.author)}</div>
+                                        <div class="comment-date">${this.formatDate(comment.date)}</div>
+                                    </div>
+                                    <div class="comment-content">${this.escapeHtml(comment.content)}</div>
+                                </div>
+                            `).join('')}
+                            
+                            <form onsubmit="return false;" style="margin-top: 1rem;">
+                                <textarea id="comment-${post.id}" placeholder="Add a comment..." style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 0.5rem;"></textarea>
+                                <button class="btn btn-primary" onclick="addComment('${post.id}')">Add Comment</button>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            async likePost(id) {
+                try {
+                    const response = await fetch(`${this.apiBase}/api/posts/${id}/like`, {
+                        method: 'POST'
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Update like count in UI
+                        const likeBtn = document.querySelector(`#post-${id} .btn`);
+                        if (likeBtn) {
+                            likeBtn.innerHTML = `❤️ ${data.likes}`;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error liking post:', error);
+                }
+            }
+            
+            async addComment(postId) {
+                const commentInput = document.getElementById(`comment-${postId}`);
+                const content = commentInput.value.trim();
+                
+                if (!content) {
+                    alert('Please enter a comment');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`${this.apiBase}/api/posts/${postId}/comments`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            author: this.currentAuthor || 'anonymous',
+                            content 
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        commentInput.value = '';
+                        await this.viewPost(postId); // Refresh the view
+                    }
+                } catch (error) {
+                    console.error('Error adding comment:', error);
+                    alert('Failed to add comment');
+                }
+            }
+            
+            // ========== UTILITIES ==========
             renderMarkdown(text) {
                 return text
                     .replace(/^### (.*$)/gm, '<h3>$1</h3>')
@@ -414,46 +498,17 @@
                     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                     .replace(/\*(.*?)\*/g, '<em>$1</em>')
                     .replace(/`([^`]+)`/g, '<code>$1</code>')
-                    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img alt="$1" src="$2" style="max-width:100%; border-radius:8px; margin:1rem 0;">')
-                    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color:var(--primary);">$1</a>')
+                    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img alt="$1" src="$2" style="max-width:100%;">')
+                    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
                     .replace(/^\s*-\s+(.*$)/gm, '<li>$1</li>')
                     .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
                     .replace(/^\s*\d+\.\s+(.*$)/gm, '<li>$1</li>')
                     .replace(/(<li>.*<\/li>)/s, '<ol>$1</ol>')
-                    .replace(/^>\s+(.*$)/gm, '<blockquote style="border-left: 3px solid var(--primary); padding-left: 1rem; margin: 1rem 0; color: var(--text-light);">$1</blockquote>')
+                    .replace(/^>\s+(.*$)/gm, '<blockquote>$1</blockquote>')
                     .replace(/\n\n/g, '</p><p>')
                     .replace(/\n/g, '<br>');
             }
             
-            async saveContent(newContent) {
-                try {
-                    this.showNotification('Saving...', 'success');
-                    
-                    const response = await fetch(`${this.apiBase}/api/content`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ content: newContent })
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        this.content = newContent;
-                        this.parseContent();
-                        this.render();
-                        this.showNotification('Saved successfully!', 'success');
-                        return true;
-                    } else {
-                        throw new Error(data.error || 'Save failed');
-                    }
-                } catch (error) {
-                    console.error('Save error:', error);
-                    this.showNotification('Save failed. Try again.', 'error');
-                    return false;
-                }
-            }
-            
-            // ========== UTILITIES ==========
             formatDate(dateStr) {
                 const date = new Date(dateStr);
                 const now = new Date();
@@ -467,87 +522,85 @@
                 return date.toLocaleDateString();
             }
             
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+            
             loadTheme() {
                 if (localStorage.getItem('theme') === 'dark') {
-                    document.body.classList.add('dark-mode');
+                    document.body.classList.add('dark');
                     document.getElementById('themeBtn').textContent = '☀️';
                 }
             }
             
             toggleTheme() {
-                document.body.classList.toggle('dark-mode');
-                const isDark = document.body.classList.contains('dark-mode');
+                document.body.classList.toggle('dark');
+                const isDark = document.body.classList.contains('dark');
                 localStorage.setItem('theme', isDark ? 'dark' : 'light');
                 document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌙';
             }
             
-            showNotification(message, type = 'success') {
-                const notification = document.getElementById('notification');
-                notification.textContent = message;
-                notification.className = `notification ${type}`;
-                notification.classList.add('show');
-                
-                setTimeout(() => {
-                    notification.classList.remove('show');
-                }, 3000);
-            }
-            
-            loadDemoContent() {
-                this.content = `---
-title: Welcome Demo
-date: ${new Date().toISOString().split('T')[0]}
-tags: demo, welcome
----
-
-# Offline Mode
-
-This is demo content. The server connection failed.
-
-## Features
-- **Edit interface** still works
-- **Markdown rendering**
-- **Dark/light mode**
-- **Responsive design**`;
-                
-                this.parseContent();
+            showError(message) {
+                const container = document.getElementById('contentArea');
+                container.innerHTML = `
+                    <div class="post-card">
+                        <h2>⚠️ Error</h2>
+                        <p>${message}</p>
+                        <button class="btn" onclick="location.reload()" style="margin-top: 1rem;">Retry</button>
+                    </div>
+                `;
             }
         }
         
         // ========== GLOBAL ==========
-        const platform = new Platform();
+        const blog = new BlogPlatform();
         
         function openEditor() {
-            const editor = document.getElementById('editor');
-            const input = document.getElementById('editorInput');
-            input.value = platform.content;
-            editor.classList.add('active');
-            input.focus();
+            document.getElementById('editorModal').classList.add('active');
         }
         
         function closeEditor() {
-            document.getElementById('editor').classList.remove('active');
+            document.getElementById('editorModal').classList.remove('active');
         }
         
-        async function saveContent() {
-            const input = document.getElementById('editorInput');
-            const success = await platform.saveContent(input.value);
-            if (success) {
-                closeEditor();
-            }
+        function createPost() {
+            blog.createPost();
+        }
+        
+        function loadPosts() {
+            blog.loadPosts();
+        }
+        
+        function filterByTag(tag) {
+            blog.loadPosts({ tag });
+        }
+        
+        function showAllPosts() {
+            blog.loadPosts();
+        }
+        
+        function showMyPosts() {
+            const author = localStorage.getItem('blog-author') || 'anonymous';
+            blog.loadPosts({ author });
+        }
+        
+        function viewPost(id) {
+            blog.viewPost(id);
+        }
+        
+        function likePost(id) {
+            blog.likePost(id);
+        }
+        
+        function addComment(postId) {
+            blog.addComment(postId);
         }
         
         function toggleTheme() {
-            platform.toggleTheme();
+            blog.toggleTheme();
         }
-        
-        // Add CSS animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes spin {
-                to { transform: rotate(360deg); }
-            }
-        `;
-        document.head.appendChild(style);
     </script>
 </body>
 </html>
